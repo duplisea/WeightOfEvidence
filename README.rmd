@@ -1,12 +1,6 @@
 ---
 title: "Weight of Evidence Calculator for Time-Varying Reference Points"
-output: md_document
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
+output: html_document
 ---
 
 ## Background
@@ -75,7 +69,7 @@ That is, the maximum assumes every non-N/A line scores 3 (strong evidence), Exce
 
 ### Score Percentage
 
-$$\text{Score\%} = \frac{\text{Total}}{\text{Maximum}} \times 100$$
+$$\text{Score} = \frac{\text{Total}}{\text{Maximum}} \times 100$$
 
 The denominator is **fixed at the full framework maximum**, not only the subset of lines the user chooses to assess. A stock assessed on only three lines will score much lower than one assessed comprehensively, even if each individual line scores perfectly. This makes scores directly comparable across stocks and assessments, and follows the spirit of Klaer et al. (2015) in treating unevaluated criteria as scoring zero.
 

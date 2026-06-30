@@ -1,5 +1,3 @@
-------------------------------------------------------------------------
-
 ## Background
 
 Biological reference points — such as *B*<sub>*M**S**Y*</sub>, the Upper
@@ -168,7 +166,7 @@ evidence), Excellent data quality, and High agreement.
 
 ### Score Percentage
 
-$$\text{Score\\} = \frac{\text{Total}}{\text{Maximum}} \times 100$$
+$$\text{Score} = \frac{\text{Total}}{\text{Maximum}} \times 100$$
 
 The denominator is **fixed at the full framework maximum**, not only the
 subset of lines the user chooses to assess. A stock assessed on only
