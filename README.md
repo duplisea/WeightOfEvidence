@@ -221,9 +221,10 @@ domain coverage.
 
 ## How to Use
 
-1.  **Download** `tvrp_tool.html` and open it in any modern web browser
+1.  **Download** `WoE.html` and open it in any modern web browser
     (Chrome, Firefox, Edge, Safari). No installation or internet
-    connection required.
+    connection required. Also download the .csv test case file.
+    `WoE.29june2026.html` is an older version.
 
 2.  **Phase 0:** Enter the stock name, mean generation time, and primary
     assessment approach. Select the reason(s) a productivity shift is
