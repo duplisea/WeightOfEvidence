@@ -1,0 +1,57 @@
+TVRP Productivity Shift Evaluation Tool — Export
+Exported,2026-06-30 11:15:23
+
+PHASE0_stock_name,Shrimp – A
+PHASE0_generation_time,4
+PHASE0_assessment_type,survey-index
+PHASE0_why_considering,"Observed changes in natural mortality|Ecosystem/environmental changes in the area|Failed recovery despite reduced fishing pressure,,,,,,,,,,,,,,,,,,"
+PHASE0_fishing_pressure_explains,"uncertain,,,,,,,,,,,,,,,,,,"
+DOMAIN_WEIGHT_A,3
+DOMAIN_WEIGHT_B,2
+DOMAIN_WEIGHT_C,1
+
+domain,id,label,subdomain,line_state,score,data_quality,agreement,ipcc_confidence_level,ipcc_confidence_weight,importance,line_max,weighted_score,onset_year,direction,valence,ongoing_status,contradicts_scientific,notes,finding_text
+A,fecundity,Fecundity/fertility change,Reproduction,scored,1,0.83,1,Medium,0.5,0.25,2.2500,0.3112,1990,Unknown,neutral,true,false,,Fecundity/fertility change shows a weak and suggestive changed trend since approximately 1990 and the change is ongoing. [Direction is context-dependent — see notes]
+A,natural_mortality,Natural mortality change,Mortality,scored,2,0.83,1,Medium,0.5,1,9.0000,2.4900,2018,Increase,bad,stabilised,false,,Natural mortality change shows a moderate increasing trend since approximately 2018 and the indicator appears to have stabilised at a new level. [Negative signal for stock productivity]
+A,failed_recovery,Failed recovery despite documented F reduction,Recovery,scored,1,0.83,1,Medium,0.5,1,9.0000,1.2450,2021,Variable,neutral,stabilised,false,,Failed recovery despite documented F reduction shows a weak and suggestive variable trend since approximately 2021 and the indicator appears to have stabilised at a new level. [Direction is context-dependent — see notes]
+A,recruitment,Recruitment time series,Reproduction,scored,2,0.67,1,Low,0.25,0.75,6.7500,0.7538,2019,Decline,bad,stabilised,false,,Recruitment time series shows a moderate declining trend since approximately 2019 and the indicator appears to have stabilised at a new level. [Negative signal for stock productivity]
+A,maturity,Age/length at maturity,Reproduction,na,,0.83,1,Medium,0.5,0.75,0,0,,Decline,bad,true,false,,
+A,skip_spawning,Skip spawning frequency,Reproduction,na,,0.83,1,Medium,0.5,0.75,0,0,,Decline,good,true,false,,
+A,weight_at_age,Weight-at-age,Growth,na,,0.83,1,Medium,0.5,0.75,0,0,,Decline,bad,true,false,,
+A,length_at_age,Length-at-age,Growth,scored,1,0.83,1,Medium,0.5,0.25,2.2500,0.3112,1990,Variable,neutral,true,false,,Length-at-age shows a weak and suggestive variable trend since approximately 1990 and the change is ongoing. [Direction is context-dependent — see notes]
+A,age_truncation,Age structure truncation,Population structure,na,,0.83,1,Medium,0.5,0.5,0,0,,Decline,good,true,false,,
+A,spatial_contraction,Spatial distribution contraction,Population structure,scored,3,1,1,Very High,1,0.75,6.7500,6.7500,2015,Increase,bad,stabilised,false,,Spatial distribution contraction shows a strong increasing trend since approximately 2015 and the indicator appears to have stabilised at a new level. [Negative signal for stock productivity]
+B,other_species,Other species showing coherent productivity shift,Ecosystem,scored,2,0.83,1,Medium,0.5,0.5,3.0000,0.8300,2012,Variable,neutral,stabilised,false,,Other species showing coherent productivity shift shows a moderate variable trend since approximately 2012 and the indicator appears to have stabilised at a new level. [Direction is context-dependent — see notes]
+B,prey_abundance,Prey species abundance change,Trophic,scored,0,0.5,0.25,Very Low,0.25,0.25,1.5000,0.0000,1990,Unknown,neutral,true,false,,Prey species abundance change shows a strong changed trend since approximately 1990 and the change is ongoing. [Direction is context-dependent — see notes]
+B,predator_abundance,Predator abundance change,Trophic,scored,3,1,1,Very High,1,1,6.0000,6.0000,2015,Increase,bad,stabilised,false,,Predator abundance change shows a strong increasing trend since approximately 2015 and the indicator appears to have stabilised at a new level. [Negative signal for stock productivity]
+B,ocean_temperature,Ocean temperature anomaly or trend,Physical environment,scored,3,1,1,Very High,1,1,6.0000,6.0000,2009,Increase,neutral,true,false,,Ocean temperature anomaly or trend shows a strong increasing trend since approximately 2009 and the change is ongoing. [Direction is context-dependent — see notes]
+B,habitat_change,"Habitat change (currents, ice, upwelling, freshwater)",Physical environment,na,,0.83,1,Medium,0.5,0.5,0,0,,Decline,bad,true,false,,
+B,dissolved_oxygen,Dissolved oxygen / hypoxia events,Physical environment,scored,2,0.83,0.5,Medium,0.5,0.75,4.5000,1.2450,2007,Decline,bad,true,false,,Dissolved oxygen / hypoxia events shows a moderate declining trend since approximately 2007 and the change is ongoing. [Negative signal for stock productivity]
+B,zooplankton,"Zooplankton anomaly (abundance, composition, timing)",Lower trophic,na,,0.83,1,Medium,0.5,0.25,0,0,,Decline,bad,true,false,,
+IKFK,ik_stock,IK: observations of stock change,Indigenous Knowledge,scored,3,1,1,Very High,1,0.75,2.2500,2.2500,2020,Decline,bad,stabilised,false,,IK: observations of stock change shows a strong declining trend since approximately 2020 and the indicator appears to have stabilised at a new level. [Negative signal for stock productivity]
+IKFK,ik_ecosystem,IK: observations of ecosystem/environment change,Indigenous Knowledge,scored,2,0.83,1,Medium,0.5,0.75,2.2500,0.6225,2007,Decline,bad,true,false,,IK: observations of ecosystem/environment change shows a moderate declining trend since approximately 2007 and the change is ongoing. [Negative signal for stock productivity]
+IKFK,fk_structured,"FK: structured data (logbooks, interviews, monitoring)",Fisher Knowledge,scored,3,1,1,Very High,1,0.75,2.2500,2.2500,2015,Decline,bad,stabilised,false,,"FK: structured data (logbooks, interviews, monitoring) shows a strong declining trend since approximately 2015 and the indicator appears to have stabilised at a new level. [Negative signal for stock productivity]"
+IKFK,fk_stock,FK: observations of stock change,Fisher Knowledge,unassessed,,0.83,1,Medium,0.5,0.5,1.5000,0,,Decline,bad,true,false,,
+IKFK,fk_ecosystem,FK: observations of ecosystem/environment change,Fisher Knowledge,unassessed,,0.83,1,Medium,0.5,0.75,2.2500,0,1999,Decline,bad,stabilised,false,,FK: observations of ecosystem/environment change shows a strong declining trend since approximately 1999 and the indicator appears to have stabilised at a new level. [Negative signal for stock productivity]
+
+IKFK_ik_consultation,"informally_consulted,,,,,,,,,,,,,,,,,,"
+IKFK_fk_consultation,"informal,,,,,,,,,,,,,,,,,,"
+IKFK_disagreement_notes,",,,,,,,,,,,,,,,,,,"
+GATE1_reversible,no
+GATE1_reversible_notes,
+GATE1_previous_collapse,no
+GATE1_life_history_changes,no
+GATE1_life_history_notes,
+GATE2_f_reduced,yes
+GATE2_f_reduction_magnitude,50
+GATE2_f_reduction_duration,4
+GATE2_f_reduction_notes,
+GATE3_primary_driver,Industry request to maintain or expand fishing access|Scientific assessment process (internal DFO)
+GATE3_industry_pressure_details,
+GATE4_mgmt_precision,5
+GATE4_rp_change_magnitude,10
+GATE4_hcr_exists,yes
+SYNTHESIS_domain_a,",,,,,,,,,,,,,,,,,,"
+SYNTHESIS_domain_b,
+SYNTHESIS_ikfk,
+SYNTHESIS_overall,

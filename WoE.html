@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TVRP Productivity Shift Evaluation Tool</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f3f4f6;color:#111827;font-size:14px}
+@media(prefers-color-scheme:dark){body{background:#0f172a;color:#f1f5f9}}
+header{background:#1e40af;color:white;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+header h1{font-size:18px;font-weight:700}
+header p{font-size:12px;color:#bfdbfe;margin-top:2px}
+.header-btns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none}
+.btn-white{background:white;color:#1e40af}.btn-white:hover{background:#eff6ff}
+.btn-blue{background:#2563eb;color:white}.btn-blue:hover{background:#1d4ed8}
+.btn-blue:disabled{opacity:.4;cursor:not-allowed}
+.btn-gray{background:#e5e7eb;color:#374151}.btn-gray:hover{background:#d1d5db}
+.btn-sm{padding:5px 10px;font-size:11px;border-radius:6px}
+nav{display:flex;background:white;border-bottom:1px solid #e5e7eb;overflow-x:auto;padding:0 16px}
+@media(prefers-color-scheme:dark){nav{background:#1e293b;border-color:#334155}}
+nav button{padding:12px 16px;font-size:13px;font-weight:500;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;white-space:nowrap;color:#6b7280}
+nav button.active{border-bottom-color:#2563eb;color:#2563eb}
+nav button:hover:not(.active){color:#374151}
+.container{max-width:920px;margin:0 auto;padding:24px 16px}
+.card{background:white;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:22px;margin-bottom:20px}
+@media(prefers-color-scheme:dark){.card{background:#1e293b}}
+.card h3{font-size:15px;font-weight:600;margin-bottom:14px;color:#1e293b}
+@media(prefers-color-scheme:dark){.card h3{color:#f1f5f9}}
+h2{font-size:17px;font-weight:700;margin-bottom:4px;color:#1e293b}
+@media(prefers-color-scheme:dark){h2{color:#f1f5f9}}
+.sub{font-size:13px;color:#6b7280;margin-bottom:20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:600px){.grid2{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:4px}
+label{font-size:12px;font-weight:500;color:#4b5563}
+@media(prefers-color-scheme:dark){label{color:#94a3b8}}
+input[type=text],input[type=number],select,textarea{border:1px solid #d1d5db;border-radius:6px;padding:8px 10px;font-size:13px;background:white;color:#111827;width:100%}
+@media(prefers-color-scheme:dark){input[type=text],input[type=number],select,textarea{background:#0f172a;border-color:#475569;color:#f1f5f9}}
+textarea{resize:vertical}
+.checkgroup{display:flex;flex-direction:column;gap:8px}
+.checkgroup label{font-size:13px;color:#374151;display:flex;align-items:flex-start;gap:8px;font-weight:400;cursor:pointer}
+@media(prefers-color-scheme:dark){.checkgroup label{color:#cbd5e1}}
+.checkgroup input{margin-top:2px;flex-shrink:0}
+.alert{border-radius:8px;padding:12px 16px;font-size:13px;border:1px solid;margin-bottom:12px}
+.alert-blue{background:#eff6ff;border-color:#93c5fd;color:#1e40af}
+.alert-amber{background:#fffbeb;border-color:#fcd34d;color:#92400e}
+.alert-red{background:#fef2f2;border-color:#fca5a5;color:#991b1b}
+.alert-green{background:#f0fdf4;border-color:#86efac;color:#166534}
+.alert-purple{background:#faf5ff;border-color:#c4b5fd;color:#5b21b6}
+@media(prefers-color-scheme:dark){
+.alert-blue{background:#1e3a5f;border-color:#3b82f6;color:#bfdbfe}
+.alert-amber{background:#422006;border-color:#d97706;color:#fde68a}
+.alert-red{background:#450a0a;border-color:#ef4444;color:#fecaca}
+.alert-green{background:#052e16;border-color:#22c55e;color:#bbf7d0}
+.alert-purple{background:#2e1065;border-color:#a855f7;color:#e9d5ff}}
+.ev-line{border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-bottom:10px;background:#f9fafb}
+.ev-line.state-scored{border-color:#93c5fd;background:#eff6ff}
+.ev-line.state-na{border-color:#d1d5db;background:#f3f4f6;opacity:0.6}
+.ev-line.state-ikfk{border-color:#c4b5fd;background:#faf5ff}
+@media(prefers-color-scheme:dark){
+.ev-line{background:#0f172a;border-color:#334155}
+.ev-line.state-scored{background:#1e3a5f;border-color:#3b82f6}
+.ev-line.state-na{background:#1e293b;border-color:#334155;opacity:0.6}
+.ev-line.state-ikfk{background:#2e1065;border-color:#a855f7}}
+.ev-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.ev-label{font-weight:600;font-size:13px;color:#1e293b}
+@media(prefers-color-scheme:dark){.ev-label{color:#f1f5f9}}
+.ev-sub{font-size:11px;color:#9ca3af;font-style:italic;margin-left:4px}
+.ev-weighted{font-size:11px;font-family:monospace;margin-left:auto;background:#dbeafe;color:#1e40af;padding:3px 8px;border-radius:6px;white-space:nowrap}
+.ev-weighted-ikfk{background:#ede9fe;color:#5b21b6}
+.ev-status-btns{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.ev-status-btn{padding:4px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:2px solid transparent}
+.ev-btn-assess{background:#dbeafe;color:#1e40af;border-color:#93c5fd}
+.ev-btn-assess.active{background:#2563eb;color:white;border-color:#2563eb}
+.ev-btn-na{background:#f3f4f6;color:#6b7280;border-color:#d1d5db}
+.ev-btn-na.active{background:#6b7280;color:white;border-color:#6b7280}
+.ev-btn-ikfk{background:#ede9fe;color:#5b21b6;border-color:#c4b5fd}
+.ev-btn-ikfk.active{background:#7c3aed;color:white;border-color:#7c3aed}
+@media(prefers-color-scheme:dark){
+.ev-btn-assess{background:#1e3a5f;color:#bfdbfe;border-color:#3b82f6}
+.ev-btn-assess.active{background:#2563eb;color:white}
+.ev-btn-na{background:#1e293b;color:#94a3b8;border-color:#334155}
+.ev-btn-na.active{background:#475569;color:white}}
+.ev-fields{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+@media(max-width:700px){.ev-fields{grid-template-columns:1fr 1fr}}
+@media(max-width:450px){.ev-fields{grid-column:1fr}}
+.ev-fields .span2{grid-column:span 2}
+.ev-fields .span3{grid-column:span 3}
+.ipcc-derived-box{background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;padding:8px 10px;font-size:12px;color:#1e40af;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+@media(prefers-color-scheme:dark){.ipcc-derived-box{background:#0c4a6e;border-color:#0284c7;color:#bfdbfe}}
+.nav-btns{display:flex;justify-content:space-between;margin-top:24px}
+.gate-card{border-radius:12px;border:2px solid #e5e7eb;padding:20px;margin-bottom:20px;background:white}
+@media(prefers-color-scheme:dark){.gate-card{background:#1e293b}}
+.gate-card.pass{border-color:#4ade80}.gate-card.flag{border-color:#fbbf24}.gate-card.stop{border-color:#f87171}.gate-card.pending{border-color:#9ca3af}
+.gate-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.gate-title{font-weight:600;font-size:14px;color:#1e293b}
+@media(prefers-color-scheme:dark){.gate-title{color:#f1f5f9}}
+.badge{font-size:11px;font-weight:700;padding:4px 12px;border-radius:999px}
+.badge-pass{background:#dcfce7;color:#166534}.badge-flag{background:#fef3c7;color:#92400e}
+.badge-stop{background:#fee2e2;color:#991b1b}.badge-pending{background:#f3f4f6;color:#6b7280}
+@media(prefers-color-scheme:dark){
+.badge-pass{background:#14532d;color:#bbf7d0}.badge-flag{background:#422006;color:#fde68a}
+.badge-stop{background:#450a0a;color:#fecaca}.badge-pending{background:#1e293b;color:#94a3b8}}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#f3f4f6;text-align:left;padding:6px 8px;border:1px solid #e5e7eb;color:#374151;white-space:nowrap}
+td{padding:5px 8px;border:1px solid #e5e7eb;color:#374151}
+tr:nth-child(even) td{background:#f9fafb}
+@media(prefers-color-scheme:dark){
+th{background:#1e293b;border-color:#334155;color:#cbd5e1}
+td{border-color:#334155;color:#cbd5e1}
+tr:nth-child(even) td{background:#0f172a}}
+.td-blue{color:#2563eb;font-family:monospace}.td-green{color:#16a34a;font-family:monospace}
+.td-purple{color:#7c3aed;font-family:monospace}
+.td-pos{color:#16a34a;font-family:monospace}.td-neg{color:#dc2626;font-family:monospace}
+.finding-block{border-left:3px solid #93c5fd;padding:10px 14px;margin-bottom:10px;background:#f8faff;border-radius:0 6px 6px 0}
+@media(prefers-color-scheme:dark){.finding-block{background:#1e3a5f;border-color:#3b82f6}}
+.finding-auto{font-size:12px;color:#374151;font-style:italic;margin-bottom:6px}
+@media(prefers-color-scheme:dark){.finding-auto{color:#94a3b8}}
+.finding-label{font-size:11px;font-weight:600;color:#6b7280;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+.ipcc-badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;margin-left:4px}
+.ipcc-very-high{background:#dcfce7;color:#166534}.ipcc-high{background:#d1fae5;color:#065f46}
+.ipcc-medium{background:#fef3c7;color:#92400e}.ipcc-low{background:#fee2e2;color:#991b1b}
+.ipcc-very-low{background:#f3f4f6;color:#6b7280}
+@media(prefers-color-scheme:dark){
+.ipcc-very-high{background:#14532d;color:#bbf7d0}.ipcc-high{background:#064e3b;color:#a7f3d0}
+.ipcc-medium{background:#422006;color:#fde68a}.ipcc-low{background:#450a0a;color:#fecaca}
+.ipcc-very-low{background:#1e293b;color:#94a3b8}}
+.valence-good{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;background:#dcfce7;color:#166534;margin-left:4px}
+.valence-bad{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;background:#fee2e2;color:#991b1b;margin-left:4px}
+.valence-neutral{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;background:#f3f4f6;color:#6b7280;margin-left:4px}
+@media(prefers-color-scheme:dark){
+.valence-good{background:#14532d;color:#bbf7d0}
+.valence-bad{background:#450a0a;color:#fecaca}
+.valence-neutral{background:#1e293b;color:#94a3b8}}
+.dir-valence-live{font-size:11px;margin-top:4px;padding:3px 8px;border-radius:4px;display:inline-block}
+.line-status-badge{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600;margin-left:4px}
+.lsb-scored{background:#dbeafe;color:#1e40af}
+.lsb-na{background:#f3f4f6;color:#6b7280}
+.lsb-unassessed{background:#fef3c7;color:#92400e}
+@media(prefers-color-scheme:dark){
+.lsb-scored{background:#1e3a5f;color:#bfdbfe}
+.lsb-na{background:#1e293b;color:#94a3b8}
+.lsb-unassessed{background:#422006;color:#fde68a}}
+.gap-domain-section{margin-bottom:14px}
+.gap-domain-title{font-size:12px;font-weight:700;color:#374151;margin-bottom:6px;padding:4px 8px;background:#f3f4f6;border-radius:4px}
+@media(prefers-color-scheme:dark){.gap-domain-title{background:#1e293b;color:#cbd5e1}}
+.gap-item{font-size:12px;padding:3px 6px;display:flex;align-items:baseline;gap:6px}
+.gap-item-critical{color:#991b1b}
+.gap-item-normal{color:#374151}
+.gap-item-na{color:#6b7280}
+@media(prefers-color-scheme:dark){.gap-item-critical{color:#fca5a5}.gap-item-normal{color:#cbd5e1}.gap-item-na{color:#94a3b8}}
+.gap-assessed{font-size:11px;color:#9ca3af;font-style:italic;padding:3px 6px}
+.synthesis-block{background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:16px;margin-bottom:12px}
+@media(prefers-color-scheme:dark){.synthesis-block{background:#0c4a6e;border-color:#0284c7}}
+.domain-contrib{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.contrib-cell{text-align:center;padding:10px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb}
+@media(prefers-color-scheme:dark){.contrib-cell{background:#0f172a;border-color:#334155}}
+.contrib-pct{font-size:22px;font-weight:700;color:#2563eb}
+.contrib-label{font-size:11px;color:#6b7280;margin-top:2px}
+.section-note{font-size:12px;color:#6b7280;margin-bottom:14px}
+.import-msg{font-size:12px;margin-top:8px}
+.import-ok{color:#86efac}.import-err{color:#fca5a5}
+.sensitivity-summary{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:10px}
+@media(prefers-color-scheme:dark){.sensitivity-summary{background:#0f172a;border-color:#334155}}
+.sens-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #f3f4f6;font-size:12px}
+@media(prefers-color-scheme:dark){.sens-row{border-color:#1e293b}}
+.sens-row:last-child{border-bottom:none}
+.disclaimer{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:16px;margin-top:8px;font-size:12px;color:#4b5563;line-height:1.6}
+@media(prefers-color-scheme:dark){.disclaimer{background:#1e293b;border-color:#334155;color:#94a3b8}}
+.intro-domain-card{border-radius:10px;padding:18px;margin-bottom:14px;border:1px solid}
+.intro-domain-a{background:#eff6ff;border-color:#93c5fd}
+.intro-domain-b{background:#f0fdf4;border-color:#86efac}
+.intro-domain-c{background:#faf5ff;border-color:#c4b5fd}
+@media(prefers-color-scheme:dark){
+.intro-domain-a{background:#1e3a5f;border-color:#3b82f6}
+.intro-domain-b{background:#052e16;border-color:#22c55e}
+.intro-domain-c{background:#2e1065;border-color:#a855f7}}
+.intro-domain-title{font-size:14px;font-weight:700;margin-bottom:6px}
+.intro-domain-a .intro-domain-title{color:#1e40af}
+.intro-domain-b .intro-domain-title{color:#166534}
+.intro-domain-c .intro-domain-title{color:#5b21b6}
+@media(prefers-color-scheme:dark){
+.intro-domain-a .intro-domain-title{color:#bfdbfe}
+.intro-domain-b .intro-domain-title{color:#bbf7d0}
+.intro-domain-c .intro-domain-title{color:#e9d5ff}}
+/* Formula box: styled equation display */
+.formula-box{background:#1e293b;color:#e2e8f0;border-radius:10px;padding:18px 22px;margin:12px 0;overflow-x:auto}
+.formula-section{margin-bottom:14px}
+.formula-section:last-child{margin-bottom:0}
+.formula-section-title{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin-bottom:8px}
+.formula-eq{display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-family:monospace;font-size:13px;line-height:1.5}
+.formula-lhs{color:#93c5fd;font-weight:700}
+.formula-eq-sign{color:#94a3b8;font-size:15px}
+.formula-rhs{color:#e2e8f0}
+.formula-prod{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.06);border-radius:6px;padding:3px 8px}
+.formula-times{color:#a78bfa;font-size:14px;font-weight:700}
+.formula-table{width:100%;border-collapse:collapse;margin-top:4px;font-size:12px;font-family:monospace}
+.formula-table td{padding:3px 8px;border:none;color:#e2e8f0}
+.formula-table td:first-child{color:#fbbf24;white-space:nowrap;width:220px}
+.formula-table td:last-child{color:#d1d5db}
+.formula-divider{border:none;border-top:1px solid rgba(255,255,255,0.1);margin:12px 0}
+.formula-pct-box{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.08);border-radius:8px;padding:8px 14px}
+.formula-fraction{display:inline-flex;flex-direction:column;align-items:center;font-family:monospace;font-size:12px;line-height:1.4}
+.formula-fraction-num{color:#86efac;padding-bottom:2px;border-bottom:1px solid #94a3b8}
+.formula-fraction-den{color:#fca5a5;padding-top:2px}
+.formula-x100{color:#a78bfa;font-size:13px;font-weight:700;margin-left:4px}
+/* ------ */
+.checklist-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid #e5e7eb;font-size:13px}
+@media(prefers-color-scheme:dark){.checklist-item{border-color:#334155}}
+.checklist-item:last-child{border-bottom:none}
+.checklist-num{width:22px;height:22px;border-radius:50%;background:#2563eb;color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.refcase-panel{background:#f8faff;border:1px solid #bfdbfe;border-radius:10px;padding:16px;margin-top:18px}
+@media(prefers-color-scheme:dark){.refcase-panel{background:#1e3a5f;border-color:#3b82f6}}
+.refcase-title{font-size:13px;font-weight:700;color:#1e40af;margin-bottom:10px}
+@media(prefers-color-scheme:dark){.refcase-title{color:#bfdbfe}}
+.refcase-cases{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+@media(max-width:500px){.refcase-cases{grid-template-columns:1fr}}
+.refcase-case{border-radius:8px;padding:12px;border:1px solid}
+.refcase-case-cod{border-color:#fca5a5;background:#fef2f2}
+.refcase-case-low{border-color:#d1d5db;background:#f9fafb}
+@media(prefers-color-scheme:dark){
+.refcase-case-cod{border-color:#ef4444;background:#450a0a}
+.refcase-case-low{border-color:#334155;background:#0f172a}}
+.refcase-case-title{font-size:12px;font-weight:700;margin-bottom:4px}
+.refcase-case-cod .refcase-case-title{color:#991b1b}
+.refcase-case-low .refcase-case-title{color:#374151}
+@media(prefers-color-scheme:dark){
+.refcase-case-cod .refcase-case-title{color:#fca5a5}
+.refcase-case-low .refcase-case-title{color:#cbd5e1}}
+.refcase-case-body{font-size:11px;color:#4b5563;line-height:1.5}
+@media(prefers-color-scheme:dark){.refcase-case-body{color:#94a3b8}}
+.verdict-panel{border-radius:10px;padding:14px 18px;margin-top:14px;border:2px solid}
+.verdict-strong{border-color:#16a34a;background:#f0fdf4}
+.verdict-moderate{border-color:#d97706;background:#fffbeb}
+.verdict-weak{border-color:#9ca3af;background:#f9fafb}
+.verdict-insufficient{border-color:#ef4444;background:#fef2f2}
+@media(prefers-color-scheme:dark){
+.verdict-strong{border-color:#22c55e;background:#052e16}
+.verdict-moderate{border-color:#f59e0b;background:#422006}
+.verdict-weak{border-color:#6b7280;background:#1e293b}
+.verdict-insufficient{border-color:#ef4444;background:#450a0a}}
+.verdict-title{font-size:14px;font-weight:700;margin-bottom:6px}
+.verdict-strong .verdict-title{color:#166534}
+.verdict-moderate .verdict-title{color:#92400e}
+.verdict-weak .verdict-title{color:#374151}
+.verdict-insufficient .verdict-title{color:#991b1b}
+@media(prefers-color-scheme:dark){
+.verdict-strong .verdict-title{color:#bbf7d0}
+.verdict-moderate .verdict-title{color:#fde68a}
+.verdict-weak .verdict-title{color:#cbd5e1}
+.verdict-insufficient .verdict-title{color:#fecaca}}
+.verdict-body{font-size:12px;line-height:1.6;color:#374151}
+@media(prefers-color-scheme:dark){.verdict-body{color:#cbd5e1}}
+/* Reference citations */
+.ref-list{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.ref-cite{font-size:11px;color:#4b5563;line-height:1.6;padding:7px 10px 7px 12px;background:#f9fafb;border-radius:0 5px 5px 0;border-left:3px solid #93c5fd}
+@media(prefers-color-scheme:dark){.ref-cite{background:#1e293b;border-color:#3b82f6;color:#94a3b8}}
+.domain-weight-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.domain-weight-label{font-size:12px;font-weight:600;min-width:160px}
+.domain-weight-val{font-size:13px;font-weight:700;min-width:36px;text-align:right}
+.wt-bar{flex:1;height:8px;background:#e5e7eb;border-radius:4px;min-width:80px}
+.wt-bar-fill{height:8px;border-radius:4px}
+@media(prefers-color-scheme:dark){.wt-bar{background:#334155}}
+.tl-bar-neutral{fill:#64748b}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Productivity Shift Evaluation Tool - Weight of Evidence Calculator</h1>
+    <p>Time-Varying Reference Point Assessment Framework. Fisheries and Oceans Canada</p>
+  </div>
+  <div class="header-btns">
+    <input type="file" id="importFile" accept=".csv" style="display:none">
+    <button class="btn btn-white" id="importBtn">&#8593; Import CSV</button>
+    <button class="btn btn-blue" id="exportBtn">&#8595; Export CSV</button>
+  </div>
+  <div id="importMsg" class="import-msg"></div>
+</header>
+<nav id="nav"></nav>
+<div class="container" id="appRoot"></div>
+
+<script>
+var TABS = ["Introduction","Phase 0","Domain A \u2014 Internal Stock Signal","Domain B \u2014 Ecosystem & Environment","Domain C \u2014 IK & FK","Prerequisites","Summary"];
+var currentTab = 0;
+
+var DOMAIN_A = [
+  {id:"fecundity",label:"Fecundity/fertility change",sub:"Reproduction",imp:1.0,
+   valence:{Decline:"bad",Increase:"good",Variable:"neutral",Unknown:"neutral"},
+   valenceNote:"A decline in fecundity is bad (fewer eggs per individual). An increase is good."},
+  {id:"natural_mortality",label:"Natural mortality change",sub:"Mortality",imp:1.0,
+   valence:{Decline:"good",Increase:"bad",Variable:"neutral",Unknown:"neutral"},
+   valenceNote:"An increase in natural mortality is bad. A decline is good."},
+  {id:"failed_recovery",label:"Failed recovery despite documented F reduction",sub:"Recovery",imp:1.0,
+   valence:{Decline:"bad",Increase:"good",Variable:"neutral",Unknown:"neutral"},
+   valenceNote:"Declining or flat stock despite reduced F is a bad signal. Recovery is good."},
+  {id:"recruitment",label:"Recruitment time series",sub:"Reproduction",imp:0.75,
+   valence:{Decline:"bad",Increase:"good",Variable:"neutral",Unknown:"neutral"},
+   valenceNote:"Declining recruitment is bad. Increasing is good."},
+  {id:"maturity",label:"Age/length at maturity",sub:"Reproduction",imp:0.75,
+   valence:{Decline:"bad",Increase:"good",Variable:"neutral",Unknown:"neutral"},
+   valenceNote:"Declining age/size at maturity is typically bad (stress response). Recovery toward historical levels is good."},
+  {id:"skip_spawning",label:"Skip spawning frequency",sub:"Reproduction",imp:0.75,
+   valence:{Decline:"good",Increase:"bad",Variable:"neutral",Unknown:"neutral"},
+   valenceNote:"Increasing skip spawning is bad. A decline is good."},
+  {id:"weight_at_age",label:"Weight-at-age",sub:"Growth",imp:0.75,
+   valence:{Decline:"bad",Increase:"good",Variable:"neutral",Unknown:"neutral"},
+   valenceNote:"Declining weight-at-age is bad. Increasing is good."},
+  {id:"length_at_age",label:"Length-at-age",sub:"Growth",imp:0.5,
+   valence:{Decline:"bad",Increase:"good",Variable:"neutral",Unknown:"neutral"},
+   valenceNote:"Declining length-at-age is bad. Increasing is good."},
+  {id:"age_truncation",label:"Age structure truncation",sub:"Population structure",imp:0.5,
+   valence:{Decline:"good",Increase:"bad",Variable:"neutral",Unknown:"neutral"},
+   valenceNote:"Increasing age truncation is bad (loss of older fish). Declining truncation is good."},
+  {id:"spatial_contraction",label:"Spatial distribution contraction",sub:"Population structure",imp:0.5,
+   valence:{Decline:"good",Increase:"bad",Variable:"neutral",Unknown:"neutral"},
+   valenceNote:"Increasing spatial contraction is bad. Declining contraction is good."}
+];
+var DOMAIN_B = [
+  {id:"other_species",label:"Other species showing coherent productivity shift",sub:"Ecosystem",imp:0.75,
+   valence:{Decline:"bad",Increase:"good",Variable:"neutral",Unknown:"neutral"},
+   valenceNote:"Coherent declines across multiple species suggest ecosystem-wide negative shift."},
+  {id:"prey_abundance",label:"Prey species abundance change",sub:"Trophic",imp:0.5,
+   valence:{Decline:"bad",Increase:"good",Variable:"neutral",Unknown:"neutral"},
+   valenceNote:"Declining prey is bad (less food). Increasing is good."},
+  {id:"predator_abundance",label:"Predator abundance change",sub:"Trophic",imp:0.5,
+   valence:{Decline:"good",Increase:"bad",Variable:"neutral",Unknown:"neutral"},
+   valenceNote:"Increasing predators is bad (greater predation pressure). Declining is good."},
+  {id:"ocean_temperature",label:"Ocean temperature anomaly or trend",sub:"Physical environment",imp:0.5,
+   valence:{Decline:"neutral",Increase:"neutral",Variable:"neutral",Unknown:"neutral"},
+   valenceNote:"Context-dependent on thermal preference. Cold-water species: decline is good, increase is bad. Warm-water species: reverse. Annotate in notes."},
+  {id:"habitat_change",label:"Habitat change (currents, ice, upwelling, freshwater)",sub:"Physical environment",imp:0.5,
+   valence:{Decline:"bad",Increase:"good",Variable:"neutral",Unknown:"neutral"},
+   valenceNote:"Declining habitat quality is generally bad. Context-specific \u2014 describe in notes."},
+  {id:"dissolved_oxygen",label:"Dissolved oxygen / hypoxia events",sub:"Physical environment",imp:0.5,
+   valence:{Decline:"bad",Increase:"good",Variable:"neutral",Unknown:"neutral"},
+   valenceNote:"Declining dissolved oxygen is bad. Improving conditions are good."},
+  {id:"zooplankton",label:"Zooplankton anomaly (abundance, composition, timing)",sub:"Lower trophic",imp:0.25,
+   valence:{Decline:"bad",Increase:"good",Variable:"neutral",Unknown:"neutral"},
+   valenceNote:"Declining zooplankton is bad. Increasing is good. Phenological mismatch: Variable."}
+];
+var DOMAIN_C = [
+  {id:"ik_stock",label:"IK: observations of stock change",sub:"Indigenous Knowledge",imp:null,
+   valence:{Decline:"bad",Increase:"good",Variable:"neutral",Unknown:"neutral"},
+   valenceNote:"IK-observed decline is a negative signal. Improvement is good."},
+  {id:"ik_ecosystem",label:"IK: observations of ecosystem/environment change",sub:"Indigenous Knowledge",imp:null,
+   valence:{Decline:"bad",Increase:"good",Variable:"neutral",Unknown:"neutral"},
+   valenceNote:"IK-observed environmental deterioration is bad. Temperature changes are context-specific."},
+  {id:"fk_structured",label:"FK: structured data (logbooks, interviews, monitoring)",sub:"Fisher Knowledge",imp:null,
+   valence:{Decline:"bad",Increase:"good",Variable:"neutral",Unknown:"neutral"},
+   valenceNote:"Declining CPUE or condition is bad. Increasing CPUE is good (consider catchability)."},
+  {id:"fk_stock",label:"FK: observations of stock change",sub:"Fisher Knowledge",imp:null,
+   valence:{Decline:"bad",Increase:"good",Variable:"neutral",Unknown:"neutral"},
+   valenceNote:"FK-observed decline in stock is bad. Improvement is good."},
+  {id:"fk_ecosystem",label:"FK: observations of ecosystem/environment change",sub:"Fisher Knowledge",imp:null,
+   valence:{Decline:"bad",Increase:"good",Variable:"neutral",Unknown:"neutral"},
+   valenceNote:"FK-observed deterioration is bad. Context-specific for temperature."}
+];
+
+var WHY_OPTS=["Failed recovery despite reduced fishing pressure","Persistent retrospective pattern in stock assessment","Changed growth (weight-at-age or length-at-age)","Changed maturity schedule","Persistent recruitment failure","Observed changes in natural mortality","Ecosystem/environmental changes in the area","Indigenous or fisher knowledge indicating change","Other (describe in notes)"];
+var DRIVER_OPTS=["Scientific assessment process (internal DFO)","Independent peer review recommendation","Management request to resolve stock status classification","Indigenous rights holder request","Industry request to maintain or expand fishing access","Other"];
+
+var REF_CASES = {
+  cod:{pct:72,label:"Northern Cod (2J3KL) \u2014 Strong case",
+    description:"All 10 Domain A lines assessed; 3 Critical lines scored 3 (Excellent quality, High agreement \u2192 Very High confidence); 4 High-importance lines scored 3 (Good quality, High agreement); 3 Moderate-importance lines scored 3 (Good quality, Medium agreement). 5 of 7 Domain B lines assessed at moderate-to-strong scores. Domain C not formally collected. Result: ~65\u201372% of the full framework maximum. The denominator is the ENTIRE framework (all lines), not just those assessed \u2014 so the Northern Cod score reflects both the strength of evidence and the comprehensiveness of the assessment."},
+  low:{pct:18,label:"Hypothetical: Weak / insufficient evidence",
+    description:"Only 3 of 22 lines assessed (recruitment, weight-at-age, other species coherence), scored 1\u20132, Fair/Poor quality, Low\u2013Medium agreement. All remaining 19 lines score 0 against the full framework denominator. Result: ~11\u201318% of the full framework maximum. This represents a situation where a shift is suspected but the evidence base has not been assembled \u2014 or cannot be assembled."}
+};
+
+function initLine(line){
+  return {
+    state:"unassessed",
+    score:0, quality:0.83, agreement:1.0,
+    importance: line.imp!==null?line.imp:0.5,
+    onset_year:"", direction:"Decline", ongoing:"true",
+    notes:"", contradicts:"false", finding_text:""
+  };
+}
+
+var S = {
+  stockName:"", generationTime:"", assessmentType:"survey-index",
+  whyConsidering:[], fishingPressureExplains:"uncertain",
+  domainA:{}, domainB:{}, ikfk:{},
+  wtA:1.0, wtB:1.0, wtC:1.0,
+  ikConsultation:"not_sought", fkConsultation:"not_sought", ikfkDisagreementNotes:"",
+  reversible:"uncertain", reversibleNotes:"", previousCollapse:"unknown",
+  lifeHistoryChanges:"unknown", lifeHistoryNotes:"",
+  fReduced:"no", fReductionMagnitude:"", fReductionDuration:"", fReductionNotes:"",
+  primaryDriver:[], industryPressureDetails:"",
+  mgmtPrecision:"", rpChangeMagnitude:"", hcrExists:"no",
+  domainASynthesis:"", domainBSynthesis:"", ikfkSynthesis:"", overallSynthesis:""
+};
+
+function resetDomains(){
+  S.domainA={}; S.domainB={}; S.ikfk={};
+  DOMAIN_A.forEach(function(l){S.domainA[l.id]=initLine(l);});
+  DOMAIN_B.forEach(function(l){S.domainB[l.id]=initLine(l);});
+  DOMAIN_C.forEach(function(l){S.ikfk[l.id]=initLine(l);});
+}
+resetDomains();
+
+var IPCC_GRID={
+  "Limited,Low":{level:"Very Low",weight:0.25},
+  "Limited,Medium":{level:"Low",weight:0.25},
+  "Limited,High":{level:"Low",weight:0.25},
+  "Medium,Low":{level:"Low",weight:0.25},
+  "Medium,Medium":{level:"Medium",weight:0.5},
+  "Medium,High":{level:"Medium",weight:0.5},
+  "Robust,Low":{level:"Medium",weight:0.5},
+  "Robust,Medium":{level:"High",weight:0.75},
+  "Robust,High":{level:"Very High",weight:1.0}
+};
+function deriveIPCC(quality,agreement){
+  var ev=quality<=0.67?"Limited":quality<=0.83?"Medium":"Robust";
+  var ag=agreement<=0.25?"Low":agreement<=0.5?"Medium":"High";
+  return IPCC_GRID[ev+","+ag]||{level:"Very Low",weight:0.25};
+}
+function evLabel(quality){return quality<=0.67?"Limited":quality<=0.83?"Medium":"Robust";}
+function agLabel(agreement){return agreement<=0.25?"Low":agreement<=0.5?"Medium":"High";}
+function ipccBadge(level){
+  var cls={"Very High":"ipcc-very-high","High":"ipcc-high","Medium":"ipcc-medium","Low":"ipcc-low","Very Low":"ipcc-very-low"};
+  return '<span class="ipcc-badge '+(cls[level]||"ipcc-very-low")+'">'+level+' confidence</span>';
+}
+function ipccTableHTML(){
+  return '<div style="overflow-x:auto;margin-bottom:16px">'
+    +'<p style="font-size:12px;font-weight:600;color:#374151;margin-bottom:6px">IPCC Confidence is derived automatically from Data Quality \u00d7 Agreement:</p>'
+    +'<table style="font-size:11px"><tr><th></th><th>Low agreement</th><th>Medium agreement</th><th>High agreement</th></tr>'
+    +'<tr><td><b>Robust (Excellent quality)</b></td><td>Medium (0.50)</td><td>High (0.75)</td><td>Very High (1.00)</td></tr>'
+    +'<tr><td><b>Medium (Good quality)</b></td><td>Low (0.25)</td><td>Medium (0.50)</td><td>Medium (0.50)</td></tr>'
+    +'<tr><td><b>Limited (Poor/Fair quality)</b></td><td>Very Low (0.25)</td><td>Low (0.25)</td><td>Low (0.25)</td></tr>'
+    +'</table><p style="font-size:11px;color:#9ca3af;margin-top:4px">Confidence weight (in parentheses) multiplies into the weighted score.</p></div>';
+}
+
+function ws(d){
+  if(d.state!=="scored") return 0;
+  return d.score*deriveIPCC(d.quality,d.agreement).weight*d.quality*d.importance;
+}
+function lineMax(d){
+  if(d.state==="na") return 0;
+  return 3*1.0*1.0*d.importance;
+}
+function domainStats(lines,ds,domainWt){
+  var w=lines.reduce(function(s,l){return s+ws(ds[l.id]);},0)*domainWt;
+  var absMx=lines.reduce(function(s,l){return s+lineMax(ds[l.id]);},0)*domainWt;
+  var scoredLines=lines.filter(function(l){return ds[l.id].state==="scored";});
+  var naLines=lines.filter(function(l){return ds[l.id].state==="na";});
+  var unassessedLines=lines.filter(function(l){return ds[l.id].state==="unassessed";});
+  return {w:w,absMx:absMx,scored:scoredLines.length,na:naLines.length,unassessed:unassessedLines.length,lines:lines,ds:ds};
+}
+
+function gate1(){return S.reversible==="yes"?"stop":S.reversible==="uncertain"?"flag":"pass";}
+function gate2(){return S.fReduced==="no"?"stop":S.fReduced==="partially"?"flag":"pass";}
+function gate4(){
+  var p=parseFloat(S.mgmtPrecision),c=parseFloat(S.rpChangeMagnitude);
+  if(!p||!c) return "pending"; if(c<p) return "stop"; if(c<p*1.5) return "flag"; return "pass";
+}
+function gate3flag(){return S.primaryDriver.indexOf("Industry request to maintain or expand fishing access")>=0&&(S.previousCollapse==="yes"||S.previousCollapse==="suspected");}
+
+function badgeHTML(o){
+  var m={pass:["badge-pass","\u2713 Pass"],flag:["badge-flag","\u26a0 Flag"],stop:["badge-stop","\u26d4 Stop"],pending:["badge-pending","\u2014 Pending"]};
+  var x=m[o]||m.pending; return '<span class="badge '+x[0]+'">'+x[1]+'</span>';
+}
+function alertHTML(t,h){return '<div class="alert alert-'+t+'">'+h+'</div>';}
+function esc(v){return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function escCSV(v){var s=String(v==null?"":v);if(s.indexOf(",")>=0||s.indexOf('"')>=0||s.indexOf("\n")>=0)return'"'+s.replace(/"/g,'""')+'"';return s;}
+function rowCSV(arr){return arr.map(escCSV).join(",");}
+
+function timestamp(){
+  var d=new Date();
+  var pad=function(n){return n<10?"0"+n:String(n);};
+  return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())
+    +" "+pad(d.getHours())+":"+pad(d.getMinutes())+":"+pad(d.getSeconds());
+}
+
+var QUAL_LEVELS=[0.5,0.67,0.83,1.0];
+var AG_LEVELS=[0.25,0.5,1.0];
+var IMP_LEVELS=[0.25,0.5,0.75,1.0];
+
+function shiftedScore(lines,ds,field,dir,domainWt){
+  return lines.reduce(function(s,l){
+    var d=ds[l.id];
+    if(d.state!=="scored") return s;
+    var arr=field==="quality"?QUAL_LEVELS:field==="agreement"?AG_LEVELS:IMP_LEVELS;
+    var idx=arr.indexOf(d[field]);
+    var ni=Math.max(0,Math.min(arr.length-1,idx+dir));
+    var nv=arr[ni];
+    var qu=field==="quality"?nv:d.quality;
+    var ag=field==="agreement"?nv:d.agreement;
+    var im=field==="importance"?nv:d.importance;
+    return s+d.score*deriveIPCC(qu,ag).weight*qu*im;
+  },0)*domainWt;
+}
+function allDomainScore(field,dir){
+  return shiftedScore(DOMAIN_A,S.domainA,field,dir,S.wtA)
+       + shiftedScore(DOMAIN_B,S.domainB,field,dir,S.wtB)
+       + shiftedScore(DOMAIN_C,S.ikfk,field,dir,S.wtC);
+}
+function shiftedMax(lines,ds,field,dir,domainWt){
+  return lines.reduce(function(s,l){
+    var d=ds[l.id];
+    if(d.state==="na") return s;
+    if(field==="importance"){
+      var arr=IMP_LEVELS;
+      var idx=arr.indexOf(d.importance);
+      var ni=Math.max(0,Math.min(arr.length-1,idx+dir));
+      return s+3*1.0*1.0*arr[ni];
+    }
+    return s+3*1.0*1.0*d.importance;
+  },0)*domainWt;
+}
+function allDomainMax(field,dir){
+  return shiftedMax(DOMAIN_A,S.domainA,field,dir,S.wtA)
+       + shiftedMax(DOMAIN_B,S.domainB,field,dir,S.wtB)
+       + shiftedMax(DOMAIN_C,S.ikfk,field,dir,S.wtC);
+}
+
+function getValence(line,direction){if(!line.valence) return "neutral"; return line.valence[direction]||"neutral";}
+function valenceBadgeHTML(v){
+  if(v==="good") return '<span class="valence-good">\u2713 Good for stock</span>';
+  if(v==="bad")  return '<span class="valence-bad">\u2717 Bad for stock</span>';
+  return '<span class="valence-neutral">\u25c8 Context-dep.</span>';
+}
+function valenceOptionSuffix(line,direction){
+  var v=getValence(line,direction);
+  if(v==="good") return " [Good]"; if(v==="bad") return " [Bad]"; return " [Context-dep.]";
+}
+
+function autoFinding(line,d){
+  if(d.state!=="scored"||d.score===0) return null;
+  var sw=["","a weak and suggestive","a moderate","a strong"];
+  var dw={Decline:"declining",Increase:"increasing",Variable:"variable",Unknown:"changed"};
+  var onset=d.onset_year?" since approximately "+d.onset_year:"";
+  var ot=d.ongoing==="true"?" and the change is ongoing":d.ongoing==="stabilised"?" and the indicator appears to have stabilised at a new level":" though the change appears to have reversed or resolved";
+  var v=getValence(line,d.direction);
+  var vc=v==="bad"?" [Negative signal for stock productivity]":v==="good"?" [Positive signal for stock productivity]":" [Direction is context-dependent \u2014 see notes]";
+  return line.label+" shows "+(sw[d.score]||"a")+" "+(dw[d.direction]||"changed")+" trend"+onset+ot+"."+vc;
+}
+
+function evidenceLineHTML(line,d,domain){
+  var isIK=domain==="ikfk";
+  var stateCls=d.state==="scored"?(isIK?"state-ikfk":"state-scored"):d.state==="na"?"state-na":"";
+  var ipcObj=deriveIPCC(d.quality,d.agreement);
+  var wv=(d.state==="scored")?(d.score*ipcObj.weight*d.quality*d.importance).toFixed(3):null;
+  var wbadge=wv?'<span class="ev-weighted '+(isIK?"ev-weighted-ikfk":"")+'">Weighted: '+wv+'</span>':"";
+  var ipcStr=(d.state==="scored"&&d.score>0)?ipccBadge(ipcObj.level):"";
+  var cv=getValence(line,d.direction);
+  var vBadgeHeader=(d.state==="scored"&&d.score>0)?valenceBadgeHTML(cv):"";
+  var lsbCls=d.state==="scored"?"lsb-scored":d.state==="na"?"lsb-na":"lsb-unassessed";
+  var lsbTxt=d.state==="scored"?"Assessed":d.state==="na"?"N/A":"Not yet assessed";
+
+  var statusBtns='<div class="ev-status-btns">'
+    +'<button class="ev-status-btn ev-btn-assess'+(d.state==="scored"?" active":"")+'" onclick="setLineState(\''+domain+'\',\''+line.id+'\',\'scored\')">Assess this line</button>'
+    +'<button class="ev-status-btn ev-btn-na'+(d.state==="na"?" active":"")+'" onclick="setLineState(\''+domain+'\',\''+line.id+'\',\'na\')">Not applicable to this stock</button>'
+    +'</div>';
+
+  var fields="";
+  if(d.state==="scored"){
+    var dirOptions=["Decline","Increase","Variable","Unknown"].map(function(v){
+      return '<option value="'+v+'"'+(d.direction===v?" selected":"")+'>'+v+valenceOptionSuffix(line,v)+'</option>';
+    }).join("");
+    var liveCls=cv==="good"?"valence-good":cv==="bad"?"valence-bad":"valence-neutral";
+    var liveText=cv==="good"?"\u2713 Good for stock":cv==="bad"?"\u2717 Bad for stock":"\u25c8 Context-dep.";
+    var ipccDerived='<div class="ipcc-derived-box"><strong>IPCC Confidence (derived):</strong> '+ipccBadge(ipcObj.level)
+      +' &nbsp; Evidence: <em>'+evLabel(d.quality)+'</em> | Agreement: <em>'+agLabel(d.agreement)+'</em> | Weight: <strong>'+ipcObj.weight+'</strong></div>';
+    var findingSection="";
+    if(d.score>0){
+      var autoF=autoFinding(line,d)||"";
+      findingSection='<div class="field span3" style="margin-top:4px">'
+        +'<label>Finding statement (auto-generated \u2014 edit as needed)</label>'
+        +'<div style="font-size:11px;color:#9ca3af;margin-bottom:4px">Auto: <em>'+esc(autoF)+'</em> '+ipcStr+'</div>'
+        +'<textarea rows="2" onchange="updateDomain(\''+domain+'\',\''+line.id+'\',\'finding_text\',this.value)">'+esc(d.finding_text)+'</textarea>'
+        +'<button class="btn btn-gray btn-sm" style="margin-top:4px;width:fit-content" onclick="autoFillFinding(\''+domain+'\',\''+line.id+'\')">&#8635; Reset to auto</button></div>';
+    }
+    var ikField=isIK?'<div class="field"><label>Contradicts scientific evidence?</label>'
+      +'<select onchange="updateDomain(\''+domain+'\',\''+line.id+'\',\'contradicts\',this.value)">'
+      +'<option value="false"'+(d.contradicts==="false"?" selected":"")+'>No \u2014 consistent</option>'
+      +'<option value="true"'+(d.contradicts==="true"?" selected":"")+'>Yes \u2014 contradicts (reconciliation required)</option>'
+      +'</select></div>':"";
+
+    fields='<div style="font-size:11px;color:#6b7280;margin-bottom:8px;padding:6px 8px;background:rgba(0,0,0,0.04);border-radius:6px;font-style:italic">'
+      +'<strong>Direction guidance:</strong> '+esc(line.valenceNote||"")+'</div>'
+      +'<div class="ev-fields">'
+      +'<div class="field"><label>Evidence Score</label>'
+      +'<select onchange="updateDomain(\''+domain+'\',\''+line.id+'\',\'score\',+this.value)">'
+      +[0,1,2,3].map(function(i){return '<option value="'+i+'"'+(d.score==i?" selected":"")+'>'+i+' \u2013 '+["Absent / no signal","Weak / suggestive","Moderate","Strong"][i]+'</option>';}).join("")
+      +'</select></div>'
+      +'<div class="field"><label>Data Quality <small style="color:#9ca3af">(Evidence axis)</small></label>'
+      +'<select onchange="updateDomain(\''+domain+'\',\''+line.id+'\',\'quality\',+this.value)">'
+      +[[0.5,"Poor \u2014 limited/anecdotal"],[0.67,"Fair \u2014 some data, gaps exist"],[0.83,"Good \u2014 solid but improvable"],[1.0,"Excellent \u2014 comprehensive"]].map(function(x){return '<option value="'+x[0]+'"'+(d.quality==x[0]?" selected":"")+'>'+x[1]+'</option>';}).join("")
+      +'</select></div>'
+      +'<div class="field"><label>Agreement <small style="color:#9ca3af">(Agreement axis)</small></label>'
+      +'<select onchange="updateDomain(\''+domain+'\',\''+line.id+'\',\'agreement\',+this.value)">'
+      +[[0.25,"Low \u2014 conflicting or single source"],[0.5,"Medium \u2014 generally consistent"],[1.0,"High \u2014 consistent, multiple independent sources"]].map(function(x){return '<option value="'+x[0]+'"'+(d.agreement==x[0]?" selected":"")+'>'+x[1]+'</option>';}).join("")
+      +'</select></div>'
+      +'<div class="ev-fields span3" style="grid-column:span 3;margin-top:6px">'+ipccDerived+'</div>'
+      +'<div class="field"><label>Importance Weight</label>'
+      +'<select onchange="updateDomain(\''+domain+'\',\''+line.id+'\',\'importance\',+this.value)">'
+      +[[1.0,"Critical"],[0.75,"High"],[0.5,"Moderate"],[0.25,"Supporting"]].map(function(x){return '<option value="'+x[0]+'"'+(d.importance==x[0]?" selected":"")+'>'+x[1]+'</option>';}).join("")
+      +'</select></div>'
+      +'<div class="field"><label>Onset Year</label>'
+      +'<input type="number" value="'+esc(d.onset_year)+'" placeholder="e.g. 1995" onchange="updateDomain(\''+domain+'\',\''+line.id+'\',\'onset_year\',this.value)"></div>'
+      +'<div class="field"><label>Direction of Change</label>'
+      +'<select onchange="updateDomain(\''+domain+'\',\''+line.id+'\',\'direction\',this.value)">'+dirOptions+'</select>'
+      +'<span class="'+liveCls+' dir-valence-live">'+liveText+'</span></div>'
+      +'<div class="field"><label>Status</label>'
+      +'<select onchange="updateDomain(\''+domain+'\',\''+line.id+'\',\'ongoing\',this.value)">'
+      +'<option value="true"'+(d.ongoing==="true"?" selected":"")+'>Ongoing \u2014 change continues</option>'
+      +'<option value="stabilised"'+(d.ongoing==="stabilised"?" selected":"")+'>Stabilised at a new level</option>'
+      +'<option value="false"'+(d.ongoing==="false"?" selected":"")+'>Reversed or resolved</option>'
+      +'</select></div>'
+      +ikField
+      +'<div class="field span2"><label>Notes</label>'
+      +'<input type="text" value="'+esc(d.notes)+'" placeholder="Supporting detail, source, caveats..." onchange="updateDomain(\''+domain+'\',\''+line.id+'\',\'notes\',this.value)"></div>'
+      +findingSection+'</div>';
+  } else if(d.state==="na"){
+    fields='<div style="font-size:12px;color:#6b7280;padding:6px 0;font-style:italic">This evidence line has been marked as not applicable to this stock. It is excluded from the scoring denominator.</div>'
+      +'<div class="field" style="max-width:400px"><label>Notes (reason for N/A)</label>'
+      +'<input type="text" value="'+esc(d.notes)+'" placeholder="Reason this line is not applicable..." onchange="updateDomain(\''+domain+'\',\''+line.id+'\',\'notes\',this.value)"></div>';
+  } else {
+    fields='<div style="font-size:12px;color:#6b7280;padding:6px 0;font-style:italic">Not yet assessed. Score = 0 (counts toward denominator). Click \u201cAssess this line\u201d to score it, or \u201cNot applicable\u201d to exclude it from the denominator.</div>';
+  }
+
+  return '<div class="ev-line '+stateCls+'" id="evline-'+domain+'-'+line.id+'">'
+    +'<div class="ev-header">'
+    +'<span class="ev-label">'+esc(line.label)+'</span>'
+    +'<span class="ev-sub">'+esc(line.sub)+'</span>'
+    +'<span class="line-status-badge '+lsbCls+'">'+lsbTxt+'</span>'
+    +vBadgeHeader+ipcStr+wbadge+'</div>'
+    +statusBtns+fields+'</div>';
+}
+
+function autoFillFinding(domain,id){
+  var all=DOMAIN_A.concat(DOMAIN_B).concat(DOMAIN_C);
+  var line=null; for(var i=0;i<all.length;i++){if(all[i].id===id){line=all[i];break;}}
+  if(line&&S[domain][id]){S[domain][id].finding_text=autoFinding(line,S[domain][id])||"";render();}
+}
+
+function domainWeightsHTML(){
+  var total=S.wtA+S.wtB+S.wtC;
+  var pA=(S.wtA/total*100).toFixed(0),pB=(S.wtB/total*100).toFixed(0),pC=(S.wtC/total*100).toFixed(0);
+  return '<div class="card"><h3>Domain Weights</h3>'
+    +'<p class="section-note">Adjust the relative weight given to each evidence domain. Default is equal weighting (1.0 each).</p>'
+    +alertHTML("blue","<strong>Note:</strong> Klaer et al. (2015) treat criteria equally. Adjust only if there are strong documented reasons, and record the rationale in the synthesis.")
+    +'<div class="domain-weight-row">'
+    +'<span class="domain-weight-label" style="color:#1e40af">Domain A \u2014 Internal</span>'
+    +'<input type="range" min="0.1" max="3" step="0.1" value="'+S.wtA+'" style="flex:1;min-width:80px" oninput="S.wtA=+this.value;render()">'
+    +'<span class="domain-weight-val">'+S.wtA.toFixed(1)+'</span>'
+    +'<div class="wt-bar"><div class="wt-bar-fill" style="width:'+pA+'%;background:#3b82f6"></div></div>'
+    +'<span style="font-size:11px;color:#6b7280;min-width:32px">'+pA+'%</span></div>'
+    +'<div class="domain-weight-row">'
+    +'<span class="domain-weight-label" style="color:#166534">Domain B \u2014 Ecosystem</span>'
+    +'<input type="range" min="0.1" max="3" step="0.1" value="'+S.wtB+'" style="flex:1;min-width:80px" oninput="S.wtB=+this.value;render()">'
+    +'<span class="domain-weight-val">'+S.wtB.toFixed(1)+'</span>'
+    +'<div class="wt-bar"><div class="wt-bar-fill" style="width:'+pB+'%;background:#22c55e"></div></div>'
+    +'<span style="font-size:11px;color:#6b7280;min-width:32px">'+pB+'%</span></div>'
+    +'<div class="domain-weight-row">'
+    +'<span class="domain-weight-label" style="color:#5b21b6">Domain C \u2014 IK &amp; FK</span>'
+    +'<input type="range" min="0.1" max="3" step="0.1" value="'+S.wtC+'" style="flex:1;min-width:80px" oninput="S.wtC=+this.value;render()">'
+    +'<span class="domain-weight-val">'+S.wtC.toFixed(1)+'</span>'
+    +'<div class="wt-bar"><div class="wt-bar-fill" style="width:'+pC+'%;background:#a855f7"></div></div>'
+    +'<span style="font-size:11px;color:#6b7280;min-width:32px">'+pC+'%</span></div>'
+    +'<button class="btn btn-gray btn-sm" style="margin-top:8px" onclick="S.wtA=1.0;S.wtB=1.0;S.wtC=1.0;render()">Reset to equal weights</button>'
+    +'</div>';
+}
+
+function scorePositioningHTML(sA,sB,sIK){
+  var obs=sA.w+sB.w+sIK.w;
+  var absMax=sA.absMx+sB.absMx+sIK.absMx;
+  if(absMax===0) return '<p class="section-note">No lines have been assessed yet. All lines currently score 0 against the full framework maximum.</p>';
+
+  var obsPct=Math.min(100,Math.max(0,(obs/absMax)*100));
+  var codPct=REF_CASES.cod.pct, lowPct=REF_CASES.low.pct;
+
+  var totalLines=DOMAIN_A.length+DOMAIN_B.length+DOMAIN_C.length;
+  var scoredCount=sA.scored+sB.scored+sIK.scored;
+  var naCount=sA.na+sB.na+sIK.na;
+  var unassessed=totalLines-scoredCount-naCount;
+
+  var baseTotal=obs;
+  var sens=[    ["Quality \u22121",allDomainScore("quality",-1)],
+    ["Quality +1",allDomainScore("quality",1)],
+    ["Agreement \u22121",allDomainScore("agreement",-1)],
+    ["Agreement +1",allDomainScore("agreement",1)],
+    ["Importance \u22121",allDomainScore("importance",-1)],
+    ["Importance +1",allDomainScore("importance",1)]
+  ];
+  var sensMin=sens.reduce(function(m,x){return Math.min(m,x[1]);},Infinity);
+  var sensMax=sens.reduce(function(m,x){return Math.max(m,x[1]);}, -Infinity);
+  var smnP=Math.min(100,Math.max(0,(sensMin/absMax)*100));
+  var smxP=Math.min(100,Math.max(0,(sensMax/absMax)*100));
+
+  var verdict, vCls;
+  if(unassessed>3){
+    vCls="verdict-weak";
+    verdict={title:"\u26a0 Assessment incomplete \u2014 "+unassessed+" line(s) not yet assessed",
+      body:"The current score ("+obsPct.toFixed(0)+"% of the full framework maximum) may increase substantially as more lines are assessed. All unassessed lines currently score 0 and are included in the denominator. Complete the assessment or mark lines Not Applicable before drawing conclusions."};
+  } else if(obsPct>=55){vCls="verdict-strong";verdict={title:"Strong evidence \u2014 supports a reference point revision",body:"The observed score ("+obsPct.toFixed(0)+"% of full framework maximum) is comparable to or exceeds the Northern Cod benchmark (~"+codPct+"%). The evidence base, if corroborated by prerequisite findings, is sufficient to support a productivity shift conclusion."};
+  } else if(obsPct>=35){vCls="verdict-moderate";verdict={title:"Moderate evidence \u2014 some support, further work recommended",body:"The observed score ("+obsPct.toFixed(0)+"%) sits between the weak-evidence benchmark (~"+lowPct+"%) and the Northern Cod benchmark (~"+codPct+"%). There is a discernible signal but it is not comprehensive."};
+  } else if(obsPct>=20){vCls="verdict-weak";verdict={title:"Weak evidence \u2014 insufficient to support revision at this time",body:"The observed score ("+obsPct.toFixed(0)+"%) is only marginally above the weak-evidence benchmark (~"+lowPct+"%). Too sparse or uncertain to support a reference point revision."};
+  } else {vCls="verdict-insufficient";verdict={title:"Insufficient evidence \u2014 revision not currently supportable",body:"The observed score ("+obsPct.toFixed(0)+"%) is at or below the weak-evidence benchmark (~"+lowPct+"%). Insufficient evidence to conclude a productivity shift has occurred."};}
+
+  var progressNote='<div style="font-size:12px;color:#6b7280;margin-bottom:10px;padding:8px 10px;background:#f9fafb;border-radius:6px;border:1px solid #e5e7eb">'
+    +'Assessment progress: <strong>'+scoredCount+' scored</strong>, <strong>'+naCount+' marked N/A</strong>, <strong>'+unassessed+' not yet assessed</strong> (of '+totalLines+' total lines). '
+    +(unassessed>0?'Unassessed lines score 0 and count against the denominator.':'All lines assessed or marked N/A.')
+    +'</div>';
+
+  var barH='<div class="refcase-panel">'
+    +'<div class="refcase-title">Score positioning relative to reference cases</div>'
+    +'<p style="font-size:12px;color:#374151;margin-bottom:10px">Score as percentage of the <strong>full framework maximum</strong> (fixed denominator across all non-N/A lines). This fixed denominator makes scores comparable across stocks and assessments regardless of how many lines were scored.</p>'
+    +progressNote
+    +'<div style="position:relative;height:70px;margin:30px 0 20px">'
+    +'<div style="position:absolute;top:30px;left:0;right:0;height:14px;background:#e5e7eb;border-radius:7px"></div>'
+    +'<div style="position:absolute;top:30px;left:'+smnP+'%;width:'+Math.max(0,smxP-smnP)+'%;height:14px;background:#bfdbfe;border-radius:7px;border:1px solid #93c5fd"></div>'
+    +'<div style="position:absolute;top:30px;left:0;width:'+obsPct+'%;height:14px;border-radius:7px;background:#3b82f6"></div>'
+    +'<div style="position:absolute;left:'+codPct+'%;top:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center">'
+    +'<span style="font-size:10px;font-weight:700;background:#dc2626;color:white;padding:1px 5px;border-radius:3px;white-space:nowrap">N.Cod ~'+codPct+'%</span>'
+    +'<div style="width:2px;height:32px;background:#dc2626;margin-top:1px"></div></div>'
+    +'<div style="position:absolute;left:'+lowPct+'%;top:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center">'
+    +'<span style="font-size:10px;font-weight:700;background:#6b7280;color:white;padding:1px 5px;border-radius:3px;white-space:nowrap">Weak ~'+lowPct+'%</span>'
+    +'<div style="width:2px;height:32px;background:#6b7280;margin-top:1px"></div></div>'
+    +'<div style="position:absolute;left:'+obsPct+'%;top:44px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center">'
+    +'<div style="width:2px;height:16px;background:#1d4ed8"></div>'
+    +'<span style="font-size:10px;font-weight:700;background:#1d4ed8;color:white;padding:1px 5px;border-radius:3px;white-space:nowrap;margin-top:1px">Your stock '+obsPct.toFixed(0)+'%</span>'
+    +'</div></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:10px;color:#9ca3af;margin-top:4px">'
+    +'<span>0% \u2014 No evidence</span><span>50%</span><span>100% \u2014 Full framework maximum</span></div>'
+    +'<div style="font-size:11px;color:#6b7280;margin-top:8px;display:flex;gap:14px;flex-wrap:wrap">'
+    +'<span><span style="display:inline-block;width:14px;height:8px;background:#bfdbfe;border:1px solid #93c5fd;border-radius:2px;margin-right:3px"></span>Sensitivity range (\u00b11 level shift)</span>'
+    +'<span><span style="display:inline-block;width:14px;height:8px;background:#3b82f6;border-radius:2px;margin-right:3px"></span>Observed score</span></div>'
+    +'<div class="refcase-cases">'
+    +'<div class="refcase-case refcase-case-cod"><div class="refcase-case-title">\ud83d\udccd '+REF_CASES.cod.label+'</div><div class="refcase-case-body">'+REF_CASES.cod.description+'</div></div>'
+    +'<div class="refcase-case refcase-case-low"><div class="refcase-case-title">\ud83d\udccd '+REF_CASES.low.label+'</div><div class="refcase-case-body">'+REF_CASES.low.description+'</div></div>'
+    +'</div></div>';
+
+  var vH='<div class="verdict-panel '+vCls+'"><div class="verdict-title">'+verdict.title+'</div><div class="verdict-body">'+verdict.body+'</div></div>';
+
+  var sensRows=sens.map(function(x){
+    var mx2=x[0].indexOf("Importance")>=0?allDomainMax(x[0].indexOf("\u22121")>=0?"importance":"importance",x[0].indexOf("\u22121")>=0?-1:1):absMax;
+    var denom=mx2>0?mx2:absMax;
+    var delta=x[1]-baseTotal;
+    var pct2=baseTotal>0?(delta/baseTotal)*100:0;
+    var cls2=delta>=0?"td-pos":"td-neg"; var sign=delta>=0?"+":"";
+    return '<div class="sens-row"><span style="color:#374151">'+x[0]+'</span>'
+      +'<span style="font-family:monospace">'+x[1].toFixed(2)+' ('+(absMax>0?((x[1]/absMax)*100).toFixed(0):0)+'% of max)</span>'
+      +'<span class="'+cls2+'" style="font-family:monospace;width:90px;text-align:right">'+sign+delta.toFixed(2)+' ('+sign+pct2.toFixed(0)+'%)</span></div>';
+  }).join("");
+
+  var sensH='<div class="sensitivity-summary" style="margin-top:16px">'
+    +'<p style="font-size:12px;font-weight:600;margin-bottom:6px;color:#374151">Sensitivity analysis \u2014 uniform \u00b11 level shift on all scored lines</p>'
+    +'<p style="font-size:11px;color:#6b7280;margin-bottom:8px">Stress test: how the total score changes if every scored line\'s quality, agreement, or importance rating is moved one level simultaneously. Unassessed and N/A lines are unaffected.</p>'
+    +sensRows+'</div>';
+
+  return barH+vH+sensH;
+}
+
+function domainContribHTML(sA,sB,sIK){
+  var total=sA.w+sB.w+sIK.w; if(total===0) return "";
+  var pA=(sA.w/total*100).toFixed(0),pB=(sB.w/total*100).toFixed(0),pI=(sIK.w/total*100).toFixed(0);
+  var warn=sA.w/total<0.5?alertHTML("amber","<strong>\u26a0 Note:</strong> Domain A contributes less than 50% of total weighted score. Result is driven primarily by ecosystem or IK/FK evidence without a strong internal stock signal. This warrants caution."):"";
+  return '<div class="domain-contrib">'
+    +'<div class="contrib-cell"><div class="contrib-pct">'+pA+'%</div><div class="contrib-label">Domain A<br>Internal stock signal</div></div>'
+    +'<div class="contrib-cell"><div class="contrib-pct" style="color:#16a34a">'+pB+'%</div><div class="contrib-label">Domain B<br>Ecosystem signal</div></div>'
+    +'<div class="contrib-cell"><div class="contrib-pct" style="color:#7c3aed">'+pI+'%</div><div class="contrib-label">Domain C \u2014 IK &amp; FK</div></div>'
+    +'</div>'+warn;
+}
+
+function domainFindingsHTML(lines,ds,borderColor){
+  var scored=lines.filter(function(l){return ds[l.id].state==="scored";});
+  if(!scored.length) return '<p class="section-note">No evidence lines scored for this domain yet.</p>';
+  var html='<div style="border-left:4px solid '+borderColor+';padding-left:14px;margin-bottom:16px">';
+  scored.forEach(function(line){
+    var d=ds[line.id];
+    if(d.score===0){
+      html+='<div class="finding-block" style="border-color:#d1d5db;opacity:0.7">'
+        +'<span class="ev-label" style="font-size:12px">'+esc(line.label)+'</span>'
+        +'<span style="font-size:12px;color:#9ca3af;margin-left:8px">\u2014 assessed: no signal detected (score 0)</span></div>';
+      return;
+    }
+    var ipc=deriveIPCC(d.quality,d.agreement);
+    var auto=autoFinding(line,d)||"";
+    var displayed=(d.finding_text&&d.finding_text.trim())?d.finding_text:auto;
+    var vb=valenceBadgeHTML(getValence(line,d.direction));
+    var st=d.ongoing==="true"?"Ongoing":d.ongoing==="stabilised"?"Stabilised at new level":"Resolved";
+    html+='<div class="finding-block"><div class="finding-label">'+esc(line.sub)+'</div>'
+      +'<div class="finding-auto">'+esc(displayed)+' '+ipccBadge(ipc.level)+' '+vb+'</div>'
+      +'<div style="font-size:11px;color:#9ca3af">Evidence: '+evLabel(d.quality)+' | Agreement: '+agLabel(d.agreement)+' | Score: '+d.score+'/3 | Onset: '+(d.onset_year||"not specified")+' | '+d.direction+' | '+st+'</div></div>';
+  });
+  html+='</div>'; return html;
+}
+
+function overallIPCCLevel(sA,sB,sIK){
+  var total=sA.w+sB.w+sIK.w, absMax=sA.absMx+sB.absMx+sIK.absMx;
+  if(absMax===0) return {level:"Very Low",evidence:"Limited",agreement:"Low"};
+  var pct=(total/absMax)*100;
+  var evLevel=pct<20?"Limited":pct<50?"Medium":"Robust";
+  var allLines=DOMAIN_A.concat(DOMAIN_B).concat(DOMAIN_C);
+  var scored=allLines.filter(function(l){var ds=(l.id in S.domainA)?S.domainA:(l.id in S.domainB)?S.domainB:S.ikfk; return ds[l.id].state==="scored";});
+  var sigLines=scored.filter(function(l){var ds=(l.id in S.domainA)?S.domainA:(l.id in S.domainB)?S.domainB:S.ikfk; return ds[l.id].score>1;});
+  var agFrac=scored.length>0?sigLines.length/scored.length:0;
+  var agLevel=agFrac<0.33?"Low":agFrac<0.67?"Medium":"High";
+  var grid={"Limited,Low":"Very Low","Limited,Medium":"Low","Limited,High":"Low","Medium,Low":"Low","Medium,Medium":"Medium","Medium,High":"Medium","Robust,Low":"Medium","Robust,Medium":"High","Robust,High":"Very High"};
+  return {level:grid[evLevel+","+agLevel]||"Low",evidence:evLevel,agreement:agLevel};
+}
+
+function gateFindingHTML(g1,g2,g4){
+  var prevFlag=S.previousCollapse==="yes"||S.previousCollapse==="suspected";
+  var lhFlag=S.lifeHistoryChanges==="yes"||S.lifeHistoryChanges==="suspected";
+  var fDur=parseFloat(S.fReductionDuration)||null, genT=parseFloat(S.generationTime)||null;
+  var g1text=S.reversible==="yes"?"The observed stock change is assessed as plausibly reversible through reduction of fishing mortality or changes to fishing selectivity."
+    :S.reversible==="uncertain"?"The extent to which the observed stock change is attributable to fishing versus environmental or biological drivers could not be clearly determined."
+    :"The observed stock change is assessed as not plausibly reversible through management action alone.";
+  var lhText=lhFlag?'<br><br><strong>Changes in life history have occurred:</strong> Persistent changes in growth, maturity, or productivity parameters have been documented or are suspected for this stock. Such life history changes shift biological reference points regardless of fishing pressure and represent a primary justification for reference point revision.'+(S.lifeHistoryNotes?' Notes: '+esc(S.lifeHistoryNotes):''):'';
+  var collapseText=prevFlag?'<br><br><strong>History of severe overexploitation:</strong> This stock has a documented or suspected history of collapse or severe overexploitation. The evaluation should carefully distinguish between productivity changes caused by historical fishing (potentially reversible) and changes caused by environmental or ecosystem drivers (requiring reference point revision). See Duplisea et al. and Hutchings &amp; Reynolds (2004).':'';
+  var g2text=S.fReduced==="no"?"Fishing mortality has not been meaningfully reduced. The stock has not been given an opportunity to demonstrate a recovery response."
+    :S.fReduced==="partially"?"Fishing mortality was reduced but not to a level or for a duration sufficient to produce an expected recovery response."+(fDur&&genT?" Maintained approximately "+fDur+" years against generation time of "+genT+" years.":"")
+    :"Fishing mortality was substantially reduced and maintained for approximately "+(fDur||"an undocumented")+" year(s)."+(fDur&&genT?" This "+(fDur>=genT?"meets":"does not meet")+" the criterion of one mean generation time ("+genT+" years).":"")+" No recovery in stock biomass was observed.";
+  var g4prec=parseFloat(S.mgmtPrecision)||null, g4chg=parseFloat(S.rpChangeMagnitude)||null;
+  var g4text=(!g4prec||!g4chg)?"Management system precision and contemplated reference point change magnitude were not specified."
+    :g4==="stop"?"The contemplated reference point change ("+g4chg+" units) is smaller than the precision of current management measures (\u00b1"+g4prec+" units). A revision would not result in a meaningfully different management outcome."
+    :g4==="flag"?"The contemplated reference point change ("+g4chg+" units) is only marginally larger than current management precision (\u00b1"+g4prec+" units). The practical effect may be limited."
+    :"The contemplated reference point change ("+g4chg+" units) is substantially larger than current management precision (\u00b1"+g4prec+" units). The management system is capable of acting on a revision of this magnitude.";
+  var bc1=g1==="stop"?"#fca5a5":g1==="flag"?"#fcd34d":"#86efac";
+  var bc2=g2==="stop"?"#fca5a5":g2==="flag"?"#fcd34d":"#86efac";
+  var bc4=g4==="stop"?"#fca5a5":g4==="flag"?"#fcd34d":g4==="pending"?"#d1d5db":"#86efac";
+  return '<div class="finding-block" style="border-color:'+bc1+'">'
+    +'<div class="finding-label">Prerequisite 1 \u2014 Reversibility &amp; Life History</div>'
+    +'<div class="finding-auto">'+g1text+lhText+collapseText+'</div></div>'
+    +'<div class="finding-block" style="border-color:'+bc2+'">'
+    +'<div class="finding-label">Prerequisite 2 \u2014 F Reduction Test</div>'
+    +'<div class="finding-auto">'+g2text+'</div>'
+    +(S.fReductionNotes?'<div style="font-size:11px;color:#9ca3af;margin-top:4px">Notes: '+esc(S.fReductionNotes)+'</div>':"")
+    +'</div>'
+    +'<div class="finding-block" style="border-color:'+bc4+'">'
+    +'<div class="finding-label">Prerequisite 4 \u2014 Management System Capability</div>'
+    +'<div class="finding-auto">'+g4text+'</div>'
+    +(S.hcrExists==="no"?'<div style="font-size:11px;color:#9ca3af;margin-top:4px">No harvest control rule is in place. Management response would require ad hoc decision-making.</div>':"")
+    +'</div>';
+}
+
+function evidenceGapsHTML(){
+  var sets=[
+    {title:"Domain A \u2014 Internal Stock Signal",lines:DOMAIN_A,ds:S.domainA},
+    {title:"Domain B \u2014 Ecosystem &amp; Environmental Signal",lines:DOMAIN_B,ds:S.domainB},
+    {title:"Domain C \u2014 IK &amp; FK",lines:DOMAIN_C,ds:S.ikfk}
+  ];
+  var anyGap=false, html="";
+  sets.forEach(function(obj){
+    html+='<div class="gap-domain-section"><div class="gap-domain-title">'+obj.title+'</div>';
+    var unassessed=obj.lines.filter(function(l){return obj.ds[l.id].state==="unassessed";});
+    var naLines=obj.lines.filter(function(l){return obj.ds[l.id].state==="na";});
+    var weak=obj.lines.filter(function(l){return obj.ds[l.id].state==="scored"&&obj.ds[l.id].score<=1&&obj.ds[l.id].agreement<=0.25;});
+    if(!unassessed.length&&!weak.length){
+      html+='<div class="gap-assessed">\u2713 All lines assessed or marked N/A.</div>';
+    }
+    unassessed.forEach(function(l){anyGap=true; var isCrit=l.imp===1.0;
+      html+='<div class="gap-item '+(isCrit?"gap-item-critical":"gap-item-normal")+'">'
+        +'<span>'+(isCrit?"\u26d4":"\u25fb")+'</span>'
+        +'<span><strong>'+esc(l.label)+'</strong>'+(isCrit?' <em style="font-size:10px">(Critical \u2014 imp=1.0)</em>':"")
+        +' \u2014 not yet assessed (scores 0 against full denominator)</span></div>';
+    });
+    naLines.forEach(function(l){
+      html+='<div class="gap-item gap-item-na"><span>\u2014</span>'
+        +'<span>'+esc(l.label)+' \u2014 marked N/A'+(obj.ds[l.id].notes?' ('+esc(obj.ds[l.id].notes)+')':'')+'</span></div>';
+    });
+    weak.forEach(function(l){anyGap=true;
+      html+='<div class="gap-item gap-item-normal"><span>\u26a0</span>'
+        +'<span><strong>'+esc(l.label)+'</strong> \u2014 weak signal (score '+obj.ds[l.id].score+') with low agreement</span></div>';
+    });
+    html+='</div>';
+  });
+  if(!anyGap) html='<p class="section-note">All evidence lines have been assessed or marked N/A, with no critical gaps.</p>'+html;
+  return html;
+}
+
+function timelineSVG(){
+  var items=[];
+  [{lines:DOMAIN_A,ds:S.domainA,domainColor:"#3b82f6",lbl:"A"},   {lines:DOMAIN_B,ds:S.domainB,domainColor:"#22c55e",lbl:"B"},   {lines:DOMAIN_C,ds:S.ikfk,domainColor:"#a855f7",lbl:"IK/FK"}].forEach(function(obj){
+    obj.lines.forEach(function(line){
+      var d=obj.ds[line.id];
+      if(d.state==="scored"&&d.score>0&&d.onset_year){
+        items.push({label:line.label.length>42?line.label.slice(0,42)+"\u2026":line.label,
+          onset:parseInt(d.onset_year),ongoing:d.ongoing,
+          domainColor:obj.domainColor,domain:obj.lbl,score:d.score});
+      }
+    });
+  });
+  if(!items.length) return '<p class="section-note">No scored lines with onset years entered yet.</p>';
+  var genTime=parseFloat(S.generationTime)||10, cur=2025;
+  var minY=Math.min.apply(null,items.map(function(i){return i.onset;}))-2;
+  var maxY=cur+2, span=maxY-minY;
+  var lw=230,cr=370,cw=lw+cr+10,rh=28, th=items.length*rh+60;
+  var xs=function(yr){return ((yr-minY)/span)*cr;};
+  var glx=xs(cur-genTime);
+  var BAR_COLOR="#64748b";
+  var svg='<svg width="'+cw+'" height="'+th+'" style="max-width:100%">'
+    +'<rect width="'+cw+'" height="'+th+'" fill="transparent"/>'
+    +'<rect x="'+(lw+glx)+'" y="0" width="'+(cr-glx)+'" height="'+(items.length*rh+40)+'" fill="rgba(59,130,246,0.07)"/>'
+    +'<line x1="'+(lw+glx)+'" y1="0" x2="'+(lw+glx)+'" y2="'+(items.length*rh+40)+'" stroke="#3b82f6" stroke-width="1" stroke-dasharray="4,3"/>'
+    +'<text x="'+(lw+glx+3)+'" y="11" font-size="9" fill="#3b82f6">\u2190 1 gen</text>'
+    +'<line x1="'+(lw+xs(cur))+'" y1="0" x2="'+(lw+xs(cur))+'" y2="'+(items.length*rh+40)+'" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="3,2"/>'
+    +'<text x="'+(lw+xs(cur)+3)+'" y="11" font-size="9" fill="#ef4444">Now</text>';
+  [minY,Math.round((minY+maxY)/2),maxY].forEach(function(yr){
+    svg+='<text x="'+(lw+xs(yr))+'" y="'+(th-8)+'" font-size="10" text-anchor="middle" fill="#6b7280">'+yr+'</text>';
+  });
+  items.forEach(function(item,i){
+    var y=i*rh+16, x1=lw+xs(item.onset);
+    var isOng=item.ongoing==="true"||item.ongoing==="stabilised";
+    var x2=isOng?lw+xs(cur):Math.min(lw+xs(cur),x1+20);
+    svg+='<text x="'+(lw-40)+'" y="'+(y+10)+'" font-size="8" text-anchor="end" fill="'+item.domainColor+'">['+item.domain+']</text>'
+      +'<text x="'+(lw-44)+'" y="'+(y+10)+'" font-size="9" text-anchor="end" fill="#374151">'+item.label+'</text>'
+      +'<rect x="'+x1+'" y="'+(y+1)+'" width="'+Math.max(x2-x1,6)+'" height="14" fill="'+BAR_COLOR+'" opacity="'+(0.25+item.score*0.22)+'" rx="2"/>'
+      +'<rect x="'+x1+'" y="'+(y+1)+'" width="6" height="14" fill="'+BAR_COLOR+'" opacity="0.9" rx="2"/>'
+      +(item.ongoing==="true"?'<polygon points="'+x2+','+(y+1)+' '+(x2+7)+','+(y+8)+' '+x2+','+(y+15)+'" fill="'+BAR_COLOR+'" opacity="0.8"/>':"")
+      +(item.ongoing==="stabilised"?'<line x1="'+(x2-1)+'" y1="'+(y+1)+'" x2="'+(x2-1)+'" y2="'+(y+15)+'" stroke="'+BAR_COLOR+'" stroke-width="2" stroke-dasharray="2,2"/>':"");
+  });
+  svg+='<line x1="'+lw+'" y1="'+(items.length*rh+40)+'" x2="'+(lw+cr)+'" y2="'+(items.length*rh+40)+'" stroke="#9ca3af" stroke-width="1"/></svg>'
+    +'<div style="display:flex;gap:14px;font-size:11px;color:#6b7280;margin-top:8px;flex-wrap:wrap">'
+    +'<span><span style="display:inline-block;width:12px;height:8px;border-radius:2px;background:#64748b;margin-right:4px"></span>Evidence line (opacity = score strength)</span>'
+    +'<span>\u25b6 Arrow = ongoing &nbsp; \u254e Dashed end = stabilised at new level</span>'
+    +'<span style="color:#3b82f6">\u258c Shaded = within 1 generation time of present</span></div>'
+    +'<div style="font-size:11px;color:#6b7280;margin-top:4px">'
+    +'<span style="color:#3b82f6">[A]</span> Domain A &nbsp; <span style="color:#22c55e">[B]</span> Domain B &nbsp; <span style="color:#a855f7">[IK/FK]</span> Domain C</div>';
+  return svg;
+}
+
+function summaryTableHTML(lines,ds,tcls){
+  var scored=lines.filter(function(l){return ds[l.id].state==="scored";});
+  var na=lines.filter(function(l){return ds[l.id].state==="na";});
+  var unassessed=lines.filter(function(l){return ds[l.id].state==="unassessed";});
+  var rows="";
+  scored.forEach(function(l){
+    var d=ds[l.id]; var ipc=deriveIPCC(d.quality,d.agreement);
+    var w=(d.score*ipc.weight*d.quality*d.importance).toFixed(3);
+    var vb=d.score>0?valenceBadgeHTML(getValence(l,d.direction)):"\u2014";
+    var st=d.ongoing==="true"?"Ongoing":d.ongoing==="stabilised"?"Stabilised":"Resolved";
+    rows+='<tr><td>'+esc(l.label)+'</td><td>Scored</td><td>'+d.score+'</td><td>'+evLabel(d.quality)+'</td><td>'+agLabel(d.agreement)+'</td><td>'+ipc.level+'</td><td>'+d.importance+'</td>'
+      +'<td class="'+tcls+'">'+w+'</td><td>'+vb+'</td><td>'+st+'</td><td>'+(d.onset_year||"\u2014")+'</td></tr>';
+  });
+  na.forEach(function(l){
+    rows+='<tr style="opacity:0.5"><td>'+esc(l.label)+'</td><td>N/A</td><td colspan="9" style="color:#9ca3af;font-style:italic">'+esc(ds[l.id].notes||"Not applicable to this stock")+'</td></tr>';
+  });
+  unassessed.forEach(function(l){
+    rows+='<tr style="opacity:0.4"><td>'+esc(l.label)+'</td><td style="color:#92400e">Not assessed</td><td colspan="9" style="color:#9ca3af;font-style:italic">Scores 0 in numerator; included in denominator</td></tr>';
+  });
+  if(!rows) return '<p class="section-note">No lines in this domain.</p>';
+  return '<div style="overflow-x:auto"><table>'
+    +'<tr><th>Evidence Line</th><th>Status</th><th>Score</th><th>Evidence</th><th>Agreement</th><th>IPCC Conf.</th><th>Imp.</th><th>Weighted</th><th>Valence</th><th>Status</th><th>Onset</th></tr>'
+    +rows+'</table></div>';
+}
+
+// ── Formula box for intro ──────────────────────────────────────────────────────
+function formulaBoxHTML(){
+  return '<div class="formula-box">'
+    // --- Line score ---
+    +'<div class="formula-section">'
+    +'<div class="formula-section-title">Weighted score per evidence line</div>'
+    +'<div class="formula-eq">'
+    +'<span class="formula-lhs">W<sub style="font-size:10px">line</sub></span>'
+    +'<span class="formula-eq-sign">=</span>'
+    +'<span class="formula-prod"><span style="color:#fbbf24">S</span><span class="formula-times">&times;</span><span style="color:#a78bfa">C</span><span class="formula-times">&times;</span><span style="color:#6ee7b7">Q</span><span class="formula-times">&times;</span><span style="color:#f9a8d4">I</span></span>'
+    +'</div>'
+    +'<hr class="formula-divider">'
+    +'<table class="formula-table">'
+    +'<tr><td style="color:#fbbf24">S &nbsp;Evidence score</td><td>0 &mdash; absent &nbsp;&bull;&nbsp; 1 &mdash; weak &nbsp;&bull;&nbsp; 2 &mdash; moderate &nbsp;&bull;&nbsp; 3 &mdash; strong</td></tr>'
+    +'<tr><td style="color:#a78bfa">C &nbsp;Confidence weight</td><td>Derived from IPCC grid: Data Quality &times; Agreement &nbsp;&rarr;&nbsp; 0.25 / 0.50 / 0.75 / 1.00</td></tr>'
+    +'<tr><td style="color:#6ee7b7">Q &nbsp;Data quality weight</td><td>Poor = 0.50 &nbsp;&bull;&nbsp; Fair = 0.67 &nbsp;&bull;&nbsp; Good = 0.83 &nbsp;&bull;&nbsp; Excellent = 1.00</td></tr>'
+    +'<tr><td style="color:#f9a8d4">I &nbsp;Importance weight</td><td>Supporting = 0.25 &nbsp;&bull;&nbsp; Moderate = 0.50 &nbsp;&bull;&nbsp; High = 0.75 &nbsp;&bull;&nbsp; Critical = 1.00</td></tr>'
+    +'</table>'
+    +'</div>'
+    // --- Total and max ---
+    +'<div class="formula-section">'
+    +'<div class="formula-section-title">Total score &amp; maximum</div>'
+    +'<div class="formula-eq" style="margin-bottom:8px">'
+    +'<span class="formula-lhs">Total</span>'
+    +'<span class="formula-eq-sign">=</span>'
+    +'<span style="color:#e2e8f0">&Sigma; W<sub style="font-size:10px">line</sub> &times; DomainWeight &nbsp;&nbsp;[scored lines only]</span>'
+    +'</div>'
+    +'<div class="formula-eq">'
+    +'<span class="formula-lhs">Maximum</span>'
+    +'<span class="formula-eq-sign">=</span>'
+    +'<span style="color:#e2e8f0">&Sigma; (3 &times; 1.00 &times; 1.00 &times; I &times; DomainWeight) &nbsp;&nbsp;[all non-N/A lines]</span>'
+    +'</div>'
+    +'</div>'
+    // --- Percentage ---
+    +'<div class="formula-section">'
+    +'<div class="formula-section-title">Score percentage</div>'
+    +'<div class="formula-eq">'
+    +'<span class="formula-lhs">Score %</span>'
+    +'<span class="formula-eq-sign">=</span>'
+    +'<span class="formula-pct-box">'
+    +'<span class="formula-fraction">'
+    +'<span class="formula-fraction-num">Total score</span>'
+    +'<span class="formula-fraction-den">Maximum score</span>'
+    +'</span>'
+    +'<span class="formula-x100">&times; 100</span>'
+    +'</span>'
+    +'</div>'
+    +'</div>'
+    +'</div>';
+}
+
+// ── Page renderers ─────────────────────────────────────────────────────────────
+function renderNav(){
+  var nav=document.getElementById("nav"); if(!nav) return;
+  nav.innerHTML=TABS.map(function(t,i){
+    return '<button class="'+(i===currentTab?"active":"")+'" onclick="goTab('+i+')">'+t+'</button>';
+  }).join("");
+}
+
+function renderIntro(){
+  var compTable='<div style="overflow-x:auto;margin:12px 0"><table>'
+    +'<tr><th>Feature</th><th>Klaer et al. (2015)</th><th>This tool (TVRP)</th></tr>'
+    +'<tr><td>Structure</td><td>4 criteria, scored 0\u20133 (max=12)</td><td>3 domains, multiplicative weighted scoring</td></tr>'
+    +'<tr><td>Scoring method</td><td>Additive sum</td><td>Score \u00d7 Confidence \u00d7 Quality \u00d7 Importance per line</td></tr>'
+    +'<tr><td>Confidence</td><td>Not formally integrated</td><td>Derived from IPCC grid (Quality \u00d7 Agreement)</td></tr>'
+    +'<tr><td>IK &amp; FK</td><td>Not included</td><td>Full Domain C with structured scoring</td></tr>'
+    +'<tr><td>Unevaluated lines</td><td>Score 0 (implicit)</td><td>Score 0 against full denominator (explicit)</td></tr>'
+    +'<tr><td>Domain weighting</td><td>Equal (implicit)</td><td>User-adjustable</td></tr>'
+    +'<tr><td>Prerequisites</td><td>Not included</td><td>Four sequential prerequisites</td></tr>'
+    +'<tr><td>Acceptance threshold</td><td>~7/12 (~58%)</td><td>Benchmarked: N.Cod ~72%, weak evidence ~18%</td></tr>'
+    +'<tr><td>Spirit &amp; intent</td><td colspan="2">Identical: structured, transparent, evidence-based to prevent ad hoc or politically motivated reference point changes</td></tr>'
+    +'</table></div>';
+
+  return '<h2>Introduction</h2>'
+    +'<p class="sub">Productivity Shift Evaluation Tool \u2014 Time-Varying Reference Point (TVRP) Assessment Framework, DFO</p>'
+    +'<div class="card"><h3>What is this tool?</h3>'
+    +'<p style="font-size:13px;line-height:1.7;color:#374151;margin-bottom:10px">This tool provides a structured, transparent framework for evaluating whether a fish stock has experienced a <strong>shift in productivity</strong> that would justify revising its biological reference points (B<sub>MSY</sub>, USR, LRP). A productivity shift is a persistent change in the stock\u2019s relationship between biomass and recruitment, growth, or natural mortality \u2014 one that cannot be fully explained by fishing pressure alone.</p>'
+    +'<p style="font-size:13px;line-height:1.7;color:#374151;margin-bottom:10px">This tool operationalises the weight-of-evidence framework of <strong>Klaer et al. (2015)</strong>. The tool is not a decision rule; all scores reflect professional judgment of the assessment team.</p>'
+    +alertHTML("blue","<strong>Important:</strong> This tool does not replace peer review or IK/FK consultation processes.")
+    +'</div>'
+    +'<div class="card"><h3>The Three Evidence Domains</h3>'
+    +'<div class="intro-domain-card intro-domain-a"><div class="intro-domain-title">Domain A \u2014 Internal Stock Signal</div>'
+    +'<p style="font-size:13px;line-height:1.6">Evidence drawn from the stock itself: growth, reproduction, population structure, natural mortality. Three lines are Critical importance (imp=1.0): fecundity/fertility, natural mortality, and failed recovery despite F reduction. Domain A should contribute at least 50% of the total score for a robust conclusion.</p></div>'
+    +'<div class="intro-domain-card intro-domain-b"><div class="intro-domain-title">Domain B \u2014 Ecosystem &amp; Environmental Signal</div>'
+    +'<p style="font-size:13px;line-height:1.6">Evidence from the surrounding environment: coherent shifts in other species, prey/predator, temperature, habitat, oxygen, and zooplankton. Most meaningful when coherent in timing with Domain A.</p></div>'
+    +'<div class="intro-domain-card intro-domain-c"><div class="intro-domain-title">Domain C \u2014 IK &amp; FK</div>'
+    +'<p style="font-size:13px;line-height:1.6">IK and FK treated as full independent evidence streams. Where they contradict scientific evidence, active reconciliation is required.</p></div></div>'
+    +'<div class="card"><h3>Scoring and the Full Framework Denominator</h3>'
+    +'<p style="font-size:13px;line-height:1.7;color:#374151;margin-bottom:8px">A key design decision: <strong>the denominator is always the full framework maximum</strong>, not just the lines you activate. This means:</p>'
+    +'<ul style="font-size:13px;line-height:1.9;color:#374151;margin-left:18px;margin-bottom:12px">'
+    +'<li>A single perfectly-scored line does <strong>not</strong> give 100% \u2014 it gives a few percent of the full maximum.</li>'
+    +'<li>Scores are directly comparable across stocks regardless of how many lines were assessed.</li>'
+    +'<li>Northern Cod (~72%) reflects both the strength of each line <em>and</em> the breadth of the assessment.</li>'
+    +'<li>Unassessed lines score 0 (same as Klaer et al. 2015 treating unevaluated criteria).</li>'
+    +'<li>Lines explicitly marked <strong>Not Applicable</strong> are excluded from both numerator and denominator.</li>'
+    +'</ul>'
+    +formulaBoxHTML()
+    +'</div>'
+    +'<div class="card"><h3>IPCC Confidence (derived, not entered)</h3>'
+    +ipccTableHTML()+'</div>'
+    +'<div class="card"><h3>Comparison with Klaer et al. (2015)</h3>'
+    +compTable
+    +'<div class="ref-list">'
+    +'<p class="ref-cite">Duplisea, D.E., Eddy, T.D., Robertson, M.D., Ruiz-D\u00edaz, R., Solberg, C.A. &amp; Zhang, F. (2025). The ghosts of overfishing past that haunt present day fisheries management. <em>Canadian Journal of Fisheries and Aquatic Sciences</em>, 82(1), 1&ndash;14.</p>'
+    +'<p class="ref-cite">Hutchings, J.A. (2000). Collapse and recovery of marine fishes. <em>Nature</em>, 406(6798), 882&ndash;885.</p>'
+    +'<p class="ref-cite">Hutchings, J.A. &amp; Reynolds, J.D. (2004). Marine fish population collapses: Consequences for recovery and extinction risk. <em>BioScience</em>, 54(4), 297&ndash;309.</p>'
+    +'<p class="ref-cite">IPCC (2010). <em>Guidance note for lead authors of the IPCC fifth assessment report on consistent treatment of uncertainties</em>. Intergovernmental Panel on Climate Change.</p>'
+    +'<p class="ref-cite">Klaer, N.L., O\u2019Boyle, R.N., Deroba, J.J., Wayte, S.E., Little, L.R., Alade, L.A. &amp; Rago, P.J. (2015). How much evidence is required for acceptance of productivity regime shifts in fish stock assessments: Are we letting managers off the hook? <em>Fisheries Research</em>, 168, 49&ndash;55.</p>'
+    +'<p class="ref-cite">Vert-Pre, K.A., Amoroso, R.O., Jensen, O.P. &amp; Hilborn, R. (2013). Frequency and intensity of productivity regime shifts in marine fish stocks. <em>Proceedings of the National Academy of Sciences</em>, 110(5), 1779&ndash;1784.</p>'
+    +'</div>'
+    +'</div>'
+    +'<div class="card"><h3>Quick-Start Checklist</h3>'
+    +[["Phase 0 + Domain Weights","Enter stock name, generation time, assessment type. Adjust domain weights if needed."],
+      ["Domain A","For each line: click \u2018Assess this line\u2019 to score it, or \u2018Not applicable\u2019 to exclude it. Default is unassessed (scores 0)."],
+      ["Domain B","Same as Domain A. For ocean temperature, note whether species is cold- or warm-water adapted."],
+      ["Domain C","Same approach. Document consultation status. Flag contradictions."],
+      ["Prerequisites","Complete the four prerequisite evaluations. Note any life history changes in Prerequisite 1."],
+      ["Summary","Review score vs. reference cases, check assessment progress, edit synthesis, export CSV."]
+    ].map(function(x,i){
+      return '<div class="checklist-item"><div class="checklist-num">'+(i+1)+'</div>'
+        +'<div><strong>'+x[0]+'</strong><br><span style="color:#6b7280">'+x[1]+'</span></div></div>';
+    }).join("")+'</div>'
+    +'<div class="nav-btns"><div></div><button class="btn btn-blue" onclick="goTab(1)">Begin \u2014 Phase 0 \u2192</button></div>';
+}
+
+function renderPage0(){
+  var whyHtml=WHY_OPTS.map(function(o){return '<label><input type="checkbox"'+(S.whyConsidering.indexOf(o)>=0?" checked":"")
+    +' onchange="toggleArr(\'whyConsidering\',\''+o.replace(/'/g,"\\'")+'\',this.checked)"> '+esc(o)+'</label>';}).join("");
+  var fpHtml=[["yes","Yes \u2014 fishing pressure likely explains current stock status"],
+    ["uncertain","Uncertain \u2014 may be a partial explanation"],
+    ["no","No \u2014 F has been substantially reduced and stock has not responded as expected"]].map(function(x){
+    return '<label><input type="radio" name="fp" value="'+x[0]+'"'+(S.fishingPressureExplains===x[0]?" checked":"")
+      +' onchange="S.fishingPressureExplains=this.value;render()"> '+x[1]+'</label>';}).join("");
+  var proceed=(!S.stockName||!S.generationTime||!S.whyConsidering.length)?" disabled":"";
+  return '<h2>Phase 0: Context Setting</h2>'
+    +'<p class="sub">Establish the stock and the reasons a productivity shift is being considered.</p>'
+    +'<div class="card"><h3>Stock Identification</h3><div class="grid2">'
+    +'<div class="field"><label>Stock / Species Name</label><input type="text" value="'+esc(S.stockName)+'" placeholder="e.g. Southern Gulf of St. Lawrence Atlantic Cod" oninput="S.stockName=this.value"></div>'
+    +'<div class="field"><label>Mean Generation Time (years)</label><input type="number" value="'+esc(S.generationTime)+'" placeholder="e.g. 8" oninput="S.generationTime=this.value"></div>'
+    +'<div class="field" style="grid-column:span 2"><label>Primary Assessment Approach</label>'
+    +'<select onchange="S.assessmentType=this.value">'
+    +[["model-based","Integrated statistical model (e.g. SS3, CASAL)"],["survey-index","Survey index / trend-based"],
+      ["catch-age","Catch-age analysis (e.g. VPA, ADAPT)"],["data-limited","Data-limited method"],["other","Other / multiple"]].map(function(x){
+      return '<option value="'+x[0]+'"'+(S.assessmentType===x[0]?" selected":"")+'>'+x[1]+'</option>';
+    }).join("")+'</select></div></div></div>'
+    +'<div class="card"><h3>Why is a Productivity Shift Being Considered?</h3>'
+    +'<p class="section-note">Select all that apply.</p><div class="checkgroup">'+whyHtml+'</div></div>'
+    +'<div class="card"><h3>Fishing Pressure as Explanation</h3>'
+    +'<p class="section-note">Could observed low biomass be explained by fishing pressure alone?</p>'
+    +'<div class="checkgroup">'+fpHtml+'</div>'
+    +(S.fishingPressureExplains==="yes"?alertHTML("amber","<strong>\u26a0 Flag:</strong> If fishing pressure explains current status, revising reference points risks rewarding inadequate management."):"")
+    +'</div>'
+    +domainWeightsHTML()
+    +'<div class="nav-btns">'
+    +'<button class="btn btn-gray" onclick="goTab(0)">\u2190 Introduction</button>'
+    +'<button class="btn btn-blue" onclick="goTab(2)"'+proceed+'>Proceed to Domain A \u2192</button>'
+    +'</div>';
+}
+
+function renderDomain(domainKey,lines,title,note,noteType){
+  var totalLines=lines.length;
+  var scoredN=lines.filter(function(l){return S[domainKey][l.id].state==="scored";}).length;
+  var naN=lines.filter(function(l){return S[domainKey][l.id].state==="na";}).length;
+  var unN=totalLines-scoredN-naN;
+  var progressBar='<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px">'
+    +'Progress: <strong>'+scoredN+' assessed</strong>, <strong>'+naN+' N/A</strong>, <strong>'+unN+' not yet assessed</strong> of '+totalLines+' lines. '
+    +(unN>0?'Unassessed lines score 0 against the full denominator.':'All lines assessed or marked N/A.')
+    +'</div>';
+  var lineHtml=lines.map(function(l){return evidenceLineHTML(l,S[domainKey][l.id],domainKey);}).join("");
+  var backTab=domainKey==="domainA"?1:domainKey==="domainB"?2:3;
+  var nextTab=domainKey==="domainA"?3:domainKey==="domainB"?4:5;
+  return '<h2>'+title+'</h2>'
+    +'<p class="sub">For each line, click <strong>Assess this line</strong> to score it, or <strong>Not applicable to this stock</strong> to exclude it from the denominator. Lines left as "Not yet assessed" score 0 and are included in the denominator.</p>'
+    +alertHTML("blue","IPCC confidence is derived automatically from Data Quality \u00d7 Agreement. The denominator for the score percentage is the <strong>full framework maximum</strong> across all non-N/A lines.")
+    +(note?alertHTML(noteType,note):"")
+    +ipccTableHTML()
+    +progressBar
+    +lineHtml
+    +'<div class="nav-btns">'
+    +'<button class="btn btn-gray" onclick="goTab('+backTab+')">\u2190 Back</button>'
+    +'<button class="btn btn-blue" onclick="goTab('+nextTab+')">Next \u2192</button>'
+    +'</div>';
+}
+
+function renderIKFK(){
+  var contras=DOMAIN_C.filter(function(l){return S.ikfk[l.id].state==="scored"&&S.ikfk[l.id].contradicts==="true";});
+  var totalLines=DOMAIN_C.length;
+  var scoredN=DOMAIN_C.filter(function(l){return S.ikfk[l.id].state==="scored";}).length;
+  var naN=DOMAIN_C.filter(function(l){return S.ikfk[l.id].state==="na";}).length;
+  var unN=totalLines-scoredN-naN;
+  var progressBar='<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px">'
+    +'Progress: <strong>'+scoredN+' assessed</strong>, <strong>'+naN+' N/A</strong>, <strong>'+unN+' not yet assessed</strong> of '+totalLines+' lines.</div>';
+  var ikOpts=[["formally_incorporated","Formally sought and incorporated"],["informally_consulted","Informally consulted"],
+    ["not_sought","Not yet sought"],["not_applicable","Not applicable"]].map(function(x){
+    return '<label><input type="radio" name="ikC" value="'+x[0]+'"'+(S.ikConsultation===x[0]?" checked":"")
+      +' onchange="S.ikConsultation=this.value;render()"> '+x[1]+'</label>';}).join("");
+  var fkOpts=[["structured","Structured collection"],["informal","Informal consultation"],
+    ["not_sought","Not yet sought"],["not_applicable","Not applicable"]].map(function(x){
+    return '<label><input type="radio" name="fkC" value="'+x[0]+'"'+(S.fkConsultation===x[0]?" checked":"")
+      +' onchange="S.fkConsultation=this.value;render()"> '+x[1]+'</label>';}).join("");
+  return '<h2>Domain C \u2014 Indigenous Knowledge &amp; Fisher Knowledge</h2>'
+    +'<p class="sub">Treated as full evidence streams. Importance weights are set by the user.</p>'
+    +alertHTML("purple","<strong>Important:</strong> Where IK or FK contradicts scientific evidence, active reconciliation is required.")
+    +'<div class="card"><h3>Indigenous Knowledge: Consultation Status</h3><div class="checkgroup">'+ikOpts+'</div>'
+    +(S.ikConsultation==="not_sought"?alertHTML("amber","<strong>\u26a0 Flag:</strong> IK has not been sought. Where Indigenous communities have rights or interests in this stock, this is a significant gap."):"")
+    +'</div>'
+    +'<div class="card"><h3>Fisher Knowledge: Consultation Status</h3><div class="checkgroup">'+fkOpts+'</div></div>'
+    +'<div class="card"><h3>IK &amp; FK Evidence Lines</h3>'
+    +ipccTableHTML()+progressBar
+    +DOMAIN_C.map(function(l){return evidenceLineHTML(l,S.ikfk[l.id],"ikfk");}).join("")+'</div>'
+    +(contras.length?'<div class="alert alert-red"><strong>\u26a0 Contradictions Flagged \u2014 Reconciliation Required</strong><br>'
+      +'Flagged: <strong>'+contras.map(function(l){return esc(l.label);}).join("; ")+'</strong><br><br>'
+      +'<textarea rows="3" style="width:100%;margin-top:6px" oninput="S.ikfkDisagreementNotes=this.value">'+esc(S.ikfkDisagreementNotes)+'</textarea></div>':"")
+    +'<div class="nav-btns">'
+    +'<button class="btn btn-gray" onclick="goTab(3)">\u2190 Back</button>'
+    +'<button class="btn btn-blue" onclick="goTab(5)">Proceed to Prerequisites \u2192</button>'
+    +'</div>';
+}
+
+function renderGates(){
+  var g1=gate1(),g2=gate2(),g3=gate3flag()?"flag":"pass",g4=gate4();
+  var prevFlag=S.previousCollapse==="yes"||S.previousCollapse==="suspected";
+  var lhFlag=S.lifeHistoryChanges==="yes"||S.lifeHistoryChanges==="suspected";
+  var industrySelected=S.primaryDriver.indexOf("Industry request to maintain or expand fishing access")>=0;
+  var fDurWarn=S.fReductionDuration&&S.generationTime&&parseFloat(S.fReductionDuration)<parseFloat(S.generationTime);
+  var g1Cls=lhFlag?"pass":g1;
+  var g1opts=[["yes","Yes \u2014 plausibly reversible"],["uncertain","Uncertain"],["no","No \u2014 not plausibly reversible through management alone"]].map(function(x){
+    return '<label><input type="radio" name="rev" value="'+x[0]+'"'+(S.reversible===x[0]?" checked":"")+' onchange="S.reversible=this.value;render()"> '+x[1]+'</label>';}).join("");
+  var lhOpts=[["yes","Yes \u2014 documented changes in growth, maturity, or productivity parameters"],
+    ["suspected","Suspected \u2014 preliminary evidence but not confirmed"],
+    ["no","No \u2014 life history parameters appear stable"],
+    ["unknown","Unknown \u2014 not yet assessed"]].map(function(x){
+    return '<label><input type="radio" name="lh" value="'+x[0]+'"'+(S.lifeHistoryChanges===x[0]?" checked":"")+' onchange="S.lifeHistoryChanges=this.value;render()"> '+x[1]+'</label>';}).join("");
+  var pcOpts=[["yes","Yes \u2014 documented"],["suspected","Suspected"],["no","No"],["unknown","Unknown"]].map(function(x){
+    return '<label><input type="radio" name="pc" value="'+x[0]+'"'+(S.previousCollapse===x[0]?" checked":"")+' onchange="S.previousCollapse=this.value;render()"> '+x[1]+'</label>';}).join("");
+  var fredOpts=[["yes","Yes \u2014 F reduced substantially for \u2265 one generation time; no recovery observed"],
+    ["partially","Partially \u2014 F reduced but not sufficiently or long enough"],
+    ["no","No \u2014 F has not been meaningfully reduced"]].map(function(x){
+    return '<label><input type="radio" name="fred" value="'+x[0]+'"'+(S.fReduced===x[0]?" checked":"")+' onchange="S.fReduced=this.value;render()"> '+x[1]+'</label>';}).join("");
+  var driverOpts=DRIVER_OPTS.map(function(o){
+    return '<label><input type="checkbox"'+(S.primaryDriver.indexOf(o)>=0?" checked":"")+' onchange="toggleArr(\'primaryDriver\',\''+o.replace(/'/g,"\\'")+'\',this.checked)"> '+esc(o)+'</label>';}).join("");
+  var hcrOpts=[["yes","Yes \u2014 HCR in place"],["partial","Partial \u2014 requires ministerial approval"],
+    ["no","No \u2014 ad hoc decision-making"]].map(function(x){
+    return '<label><input type="radio" name="hcr" value="'+x[0]+'"'+(S.hcrExists===x[0]?" checked":"")+' onchange="S.hcrExists=this.value;render()"> '+x[1]+'</label>';}).join("");
+
+  return '<h2>Layer 2: Should Reference Points Be Changed? (Prerequisites)</h2>'
+    +'<p class="sub">These prerequisite evaluations are analyzed in sequence.</p>'
+    +'<div class="gate-card '+g1Cls+'">'
+    +'<div class="gate-header"><span class="gate-title">Prerequisite 1: Reversibility &amp; Life History Changes</span>'+badgeHTML(g1)+'</div>'
+    +'<p style="font-weight:600;margin-bottom:6px">Reversibility: Could the observed change be reversed by management action?</p>'
+    +'<div class="checkgroup" style="margin-bottom:14px">'+g1opts+'</div>'
+    +'<p style="font-weight:600;margin-bottom:6px">Changes in life history have occurred?</p>'
+    +'<p class="section-note">Persistent changes in growth, maturity, fecundity, or other life history parameters shift biological reference points regardless of fishing pressure. Such changes are a primary justification for reference point revision.</p>'
+    +'<div class="checkgroup" style="margin-bottom:10px">'+lhOpts+'</div>'
+    +(lhFlag?alertHTML("green","<strong>\u2713 Life history changes documented or suspected.</strong> This is a positive indicator supporting reference point revision. Ensure Domain A evidence lines (growth, maturity, fecundity) are assessed and scored."):"")
+    +'<div class="field" style="margin-bottom:14px"><label>Notes on life history changes</label>'
+    +'<textarea rows="2" onchange="S.lifeHistoryNotes=this.value">'+esc(S.lifeHistoryNotes)+'</textarea></div>'
+    +'<p style="font-weight:600;margin-bottom:6px">Previous severe overexploitation or collapse?</p>'
+    +'<p class="section-note">Requires careful evaluation to distinguish fishing-induced productivity impairment from environmental productivity shifts (Duplisea et al.; Hutchings &amp; Reynolds 2004).</p>'
+    +'<div class="checkgroup" style="margin-bottom:10px">'+pcOpts+'</div>'
+    +(prevFlag?alertHTML("amber","<strong>\u26a0 History of severe overexploitation:</strong> Carefully distinguish between productivity changes caused by historical fishing (potentially reversible) and those caused by environmental or ecosystem drivers (requiring reference point revision)."):"")
+    +'<div class="field" style="margin-top:10px"><label>Notes on reversibility</label>'
+    +'<textarea rows="2" onchange="S.reversibleNotes=this.value">'+esc(S.reversibleNotes)+'</textarea></div>'
+    +'</div>'
+    +'<div class="gate-card '+g2+'">'
+    +'<div class="gate-header"><span class="gate-title">Prerequisite 2: F Reduction Test</span>'+badgeHTML(g2)+'</div>'
+    +'<p class="section-note">Was F reduced to a level and for long enough that a stock response would have been expected?</p>'
+    +'<div class="checkgroup" style="margin-bottom:12px">'+fredOpts+'</div>'
+    +'<div class="grid2" style="margin-top:10px">'
+    +'<div class="field"><label>F reduction magnitude (% of previous F)</label><input type="number" value="'+esc(S.fReductionMagnitude)+'" placeholder="e.g. 50" onchange="S.fReductionMagnitude=this.value;render()"></div>'
+    +'<div class="field"><label>Duration of reduced F (years)</label><input type="number" value="'+esc(S.fReductionDuration)+'" placeholder="e.g. 12" onchange="S.fReductionDuration=this.value;render()"></div>'
+    +'</div>'
+    +(fDurWarn?alertHTML("amber","<strong>\u26a0 Note:</strong> F reduction duration ("+S.fReductionDuration+" yr) is less than mean generation time ("+S.generationTime+" yr)."):"")
+    +'<div class="field" style="margin-top:10px"><label>Notes on F history</label><textarea rows="2" onchange="S.fReductionNotes=this.value">'+esc(S.fReductionNotes)+'</textarea></div>'
+    +'</div>'
+    +'<div class="gate-card '+g3+'">'
+    +'<div class="gate-header"><span class="gate-title">Prerequisite 3: Motivation Audit (Internal only \u2014 not in output)</span>'+badgeHTML(g3)+'</div>'
+    +alertHTML("blue","<strong>Confidential:</strong> This section does not appear in the Summary tab or exported CSV.")
+    +'<div class="checkgroup" style="margin-bottom:12px">'+driverOpts+'</div>'
+    +(industrySelected?'<div class="field" style="margin-bottom:10px"><label>Details</label><textarea rows="2" onchange="S.industryPressureDetails=this.value">'+esc(S.industryPressureDetails)+'</textarea></div>':"")
+    +(gate3flag()?alertHTML("amber","<strong>\u26a0 Internal Flag:</strong> Industry pressure on a stock with history of collapse. Extra scrutiny warranted."):"")
+    +'</div>'
+    +'<div class="gate-card '+g4+'">'
+    +'<div class="gate-header"><span class="gate-title">Prerequisite 4: Management System Capability</span>'+badgeHTML(g4)+'</div>'
+    +'<div class="grid2" style="margin-bottom:12px">'
+    +'<div class="field"><label>Management precision (e.g. \u00b1kt)</label><input type="number" value="'+esc(S.mgmtPrecision)+'" placeholder="e.g. 10" onchange="S.mgmtPrecision=this.value;render()"></div>'
+    +'<div class="field"><label>Contemplated RP change (same units)</label><input type="number" value="'+esc(S.rpChangeMagnitude)+'" placeholder="e.g. 5" onchange="S.rpChangeMagnitude=this.value;render()"></div>'
+    +'</div>'
+    +'<p style="font-weight:600;margin-bottom:8px">Harvest control rule in place?</p>'
+    +'<div class="checkgroup">'+hcrOpts+'</div></div>'
+    +'<div class="nav-btns">'
+    +'<button class="btn btn-gray" onclick="goTab(4)">\u2190 Back</button>'
+    +'<button class="btn btn-blue" onclick="goTab(6)">View Summary \u2192</button>'
+    +'</div>';
+}
+
+function renderSummary(){
+  var sA=domainStats(DOMAIN_A,S.domainA,S.wtA);
+  var sB=domainStats(DOMAIN_B,S.domainB,S.wtB);
+  var sIK=domainStats(DOMAIN_C,S.ikfk,S.wtC);
+  var g1=gate1(),g2=gate2(),g4=gate4();
+  var ovIPCC=overallIPCCLevel(sA,sB,sIK);
+  var contras=DOMAIN_C.filter(function(l){return S.ikfk[l.id].state==="scored"&&S.ikfk[l.id].contradicts==="true";});
+  var wtNote='<p style="font-size:11px;color:#6b7280;margin-top:6px">Domain weights: A='+S.wtA.toFixed(1)+', B='+S.wtB.toFixed(1)+', C='+S.wtC.toFixed(1)+(S.wtA===1.0&&S.wtB===1.0&&S.wtC===1.0?' (equal, default)':'')+'.</p>';
+
+  return '<h2>Summary</h2>'
+    +'<p class="sub"><strong>'+esc(S.stockName||"[Stock not specified]")+'</strong> | Generation time: '+(S.generationTime?S.generationTime+" yr":"\u2014")+' | '+S.assessmentType+'</p>'
+    +'<div class="card"><h3>1. Score Positioning &amp; Reference Case Comparison</h3>'
+    +'<p class="section-note">Score as percentage of the <strong>full framework maximum</strong> (fixed denominator across all non-N/A lines). Directly comparable to Northern Cod.</p>'
+    +scorePositioningHTML(sA,sB,sIK)+wtNote+'</div>'
+    +'<div class="card"><h3>2. Domain Contributions</h3>'
+    +'<p class="section-note">Proportion of total weighted score by domain (after domain weights). Contribution of unscored lines = 0.</p>'
+    +domainContribHTML(sA,sB,sIK)+'</div>'
+    +'<div class="card"><h3>3. Findings by Evidence Domain</h3>'
+    +'<p class="section-note">Only scored lines appear here. IPCC confidence derived from Data Quality \u00d7 Agreement. Valence badges indicate biological direction interpretation but bars in the timeline are neutral (direction of change cannot be universally colour-coded without stock-specific context).</p>'
+    +'<div style="margin-bottom:18px">'
+    +'<h4 style="font-size:13px;font-weight:600;margin-bottom:8px;color:#1d4ed8">Domain A \u2014 Internal Stock Signal</h4>'
+    +domainFindingsHTML(DOMAIN_A,S.domainA,"#93c5fd")
+    +'<div class="field" style="margin-top:10px"><label>Domain A synthesis statement</label>'
+    +'<textarea rows="3" oninput="S.domainASynthesis=this.value" placeholder="Summarise the overall internal stock signal...">'+esc(S.domainASynthesis)+'</textarea></div></div>'
+    +'<div style="margin-bottom:18px">'
+    +'<h4 style="font-size:13px;font-weight:600;margin-bottom:8px;color:#16a34a">Domain B \u2014 Ecosystem &amp; Environmental Signal</h4>'
+    +domainFindingsHTML(DOMAIN_B,S.domainB,"#86efac")
+    +'<div class="field" style="margin-top:10px"><label>Domain B synthesis statement</label>'
+    +'<textarea rows="3" oninput="S.domainBSynthesis=this.value" placeholder="Summarise the overall ecosystem signal...">'+esc(S.domainBSynthesis)+'</textarea></div></div>'
+    +'<div><h4 style="font-size:13px;font-weight:600;margin-bottom:8px;color:#7c3aed">Domain C \u2014 IK &amp; FK</h4>'
+    +domainFindingsHTML(DOMAIN_C,S.ikfk,"#c4b5fd")
+    +(contras.length?alertHTML("red","<strong>\u26a0 Unresolved contradiction:</strong> "+contras.length+" IK/FK line(s) contradict scientific evidence."):"")
+    +(S.ikConsultation==="not_sought"?alertHTML("amber","<strong>\u26a0 IK not sought.</strong> Significant gap where Indigenous communities have rights or interests in this stock."):"")
+    +'<div class="field" style="margin-top:10px"><label>IK &amp; FK synthesis statement</label>'
+    +'<textarea rows="3" oninput="S.ikfkSynthesis=this.value" placeholder="Summarise IK/FK evidence and consultation status...">'+esc(S.ikfkSynthesis)+'</textarea></div></div></div>'
+    +'<div class="card"><h3>4. Overall Synthesis</h3>'
+    +'<div class="synthesis-block"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">'
+    +'<span style="font-size:13px;font-weight:600">Overall confidence:</span>'+ipccBadge(ovIPCC.level)+'</div>'
+    +'<div style="font-size:12px;color:#374151;margin-bottom:8px">Evidence level: <em>'+ovIPCC.evidence+'</em> | Agreement level: <em>'+ovIPCC.agreement+'</em></div></div>'
+    +'<div class="field"><label>Overall synthesis statement</label>'
+    +'<textarea rows="5" oninput="S.overallSynthesis=this.value" placeholder="e.g. Multiple internal stock indicators for [stock name] show coherent trends... The overall weight of evidence is assessed as [characterisation] ('+ovIPCC.level+' confidence).">'+esc(S.overallSynthesis)+'</textarea></div></div>'
+    +'<div class="card"><h3>5. Prerequisite Findings</h3>'
+    +'<p class="section-note">Factual statements from each prerequisite evaluation.</p>'
+    +gateFindingHTML(g1,g2,g4)+'</div>'
+    +'<div class="card"><h3>6. Evidence Gaps</h3>'
+    +'<p class="section-note">\u26d4 = Critical importance (imp=1.0) unassessed. \u25fb = lower importance unassessed. \u2014 = marked N/A. \u26a0 = weak signal with low agreement.</p>'
+    +evidenceGapsHTML()+'</div>'
+    +'<div class="card"><h3>7. Evidence Timeline</h3>'
+    +'<p class="section-note">Scored lines with onset years entered. Bar opacity reflects score strength. All bars are a uniform neutral colour \u2014 direction is noted in the findings above but cannot be universally colour-coded (e.g. a temperature decline is good for some species and bad for others).</p>'
+    +timelineSVG()+'</div>'
+    +(sA.scored?'<div class="card"><h3>8a. Domain A Evidence Detail</h3>'+summaryTableHTML(DOMAIN_A,S.domainA,"td-blue")+'</div>':"")
+    +(sB.scored?'<div class="card"><h3>8b. Domain B Evidence Detail</h3>'+summaryTableHTML(DOMAIN_B,S.domainB,"td-green")+'</div>':"")
+    +(sIK.scored?'<div class="card"><h3>8c. IK &amp; FK Evidence Detail</h3>'+summaryTableHTML(DOMAIN_C,S.ikfk,"td-purple")+'</div>':"")
+    +'<div class="disclaimer"><strong>Note on interpretation:</strong> The score percentage uses the full framework maximum as denominator, making it directly comparable across stocks and to the Northern Cod reference case (~72%). Klaer et al. (2015) found that a score of ~7/12 (~58%) was empirically associated with acceptance of productivity shifts; this tool\'s equivalent threshold is approximately 35\u201355% of the full framework maximum depending on domain coverage. Decisions about reference point revision remain with the advisory and management process.</div>'
+    +'<div class="card" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">'
+    +'<div><p style="font-weight:600">Export this evaluation</p><p class="section-note" style="margin:0">Saves all scores, findings, synthesis statements, prerequisites, and metadata as CSV.</p></div>'
+    +'<button class="btn btn-blue" onclick="exportCSV()">\u2193 Export CSV</button></div>'
+    +'<div class="nav-btns"><button class="btn btn-gray" onclick="goTab(5)">\u2190 Back to Prerequisites</button><div></div></div>';
+}
+
+function render(){
+  renderNav();
+  var root=document.getElementById("appRoot"); if(!root) return;
+  if(currentTab===0)      root.innerHTML=renderIntro();
+  else if(currentTab===1) root.innerHTML=renderPage0();
+  else if(currentTab===2) root.innerHTML=renderDomain("domainA",DOMAIN_A,"Domain A: Internal Stock Signal","","");
+  else if(currentTab===3) root.innerHTML=renderDomain("domainB",DOMAIN_B,"Domain B: Ecosystem &amp; Environmental Signal",
+    "<strong>Note:</strong> For ocean temperature, the Good/Bad interpretation depends on the species\u2019 thermal preference \u2014 annotate in notes.","green");
+  else if(currentTab===4) root.innerHTML=renderIKFK();
+  else if(currentTab===5) root.innerHTML=renderGates();
+  else if(currentTab===6) root.innerHTML=renderSummary();
+}
+function goTab(i){currentTab=i;render();window.scrollTo(0,0);}
+function setLineState(domain,id,state){S[domain][id].state=state;render();}
+function updateDomain(domain,id,field,value){
+  S[domain][id][field]=value;
+  if(["score","quality","agreement","importance","direction","ongoing","onset_year"].indexOf(field)>=0) render();
+}
+function toggleArr(key,val,checked){
+  if(checked){if(S[key].indexOf(val)<0)S[key].push(val);}
+  else{S[key]=S[key].filter(function(x){return x!==val;});}
+}
+
+function exportCSV(){
+  var ts=timestamp();
+  var lines=[];
+  lines.push(rowCSV(["TVRP Productivity Shift Evaluation Tool \u2014 Export"]));
+  lines.push(rowCSV(["Exported",ts]));
+  lines.push("");
+  lines.push(rowCSV(["PHASE0_stock_name",S.stockName]));
+  lines.push(rowCSV(["PHASE0_generation_time",S.generationTime]));
+  lines.push(rowCSV(["PHASE0_assessment_type",S.assessmentType]));
+  lines.push(rowCSV(["PHASE0_why_considering",S.whyConsidering.join("|")]));
+  lines.push(rowCSV(["PHASE0_fishing_pressure_explains",S.fishingPressureExplains]));
+  lines.push(rowCSV(["DOMAIN_WEIGHT_A",S.wtA]));
+  lines.push(rowCSV(["DOMAIN_WEIGHT_B",S.wtB]));
+  lines.push(rowCSV(["DOMAIN_WEIGHT_C",S.wtC]));
+  lines.push("");
+  lines.push(rowCSV(["domain","id","label","subdomain","line_state","score","data_quality","agreement","ipcc_confidence_level","ipcc_confidence_weight","importance","line_max","weighted_score","onset_year","direction","valence","ongoing_status","contradicts_scientific","notes","finding_text"]));
+  [{key:"A",dl:DOMAIN_A,ds:S.domainA,wt:S.wtA},{key:"B",dl:DOMAIN_B,ds:S.domainB,wt:S.wtB},{key:"IKFK",dl:DOMAIN_C,ds:S.ikfk,wt:S.wtC}].forEach(function(obj){
+    obj.dl.forEach(function(line){
+      var d=obj.ds[line.id];
+      var ipc=deriveIPCC(d.quality,d.agreement);
+      var w=(d.state==="scored")?(d.score*ipc.weight*d.quality*d.importance*obj.wt).toFixed(4):"0";
+      var lm=(d.state==="na")?"0":(3*1.0*1.0*d.importance*obj.wt).toFixed(4);
+      var vi=getValence(line,d.direction);
+      lines.push(rowCSV([obj.key,line.id,line.label,line.sub,d.state,
+        d.state==="scored"?d.score:"",d.quality,d.agreement,ipc.level,ipc.weight,d.importance,lm,w,
+        d.onset_year,d.direction,vi,d.ongoing,d.contradicts,d.notes,d.finding_text||""]));
+    });
+  });
+  lines.push("");
+  lines.push(rowCSV(["IKFK_ik_consultation",S.ikConsultation]));
+  lines.push(rowCSV(["IKFK_fk_consultation",S.fkConsultation]));
+  lines.push(rowCSV(["IKFK_disagreement_notes",S.ikfkDisagreementNotes]));
+  lines.push(rowCSV(["GATE1_reversible",S.reversible]));
+  lines.push(rowCSV(["GATE1_reversible_notes",S.reversibleNotes]));
+  lines.push(rowCSV(["GATE1_previous_collapse",S.previousCollapse]));
+  lines.push(rowCSV(["GATE1_life_history_changes",S.lifeHistoryChanges]));
+  lines.push(rowCSV(["GATE1_life_history_notes",S.lifeHistoryNotes]));
+  lines.push(rowCSV(["GATE2_f_reduced",S.fReduced]));
+  lines.push(rowCSV(["GATE2_f_reduction_magnitude",S.fReductionMagnitude]));
+  lines.push(rowCSV(["GATE2_f_reduction_duration",S.fReductionDuration]));
+  lines.push(rowCSV(["GATE2_f_reduction_notes",S.fReductionNotes]));
+  lines.push(rowCSV(["GATE3_primary_driver",S.primaryDriver.join("|")]));
+  lines.push(rowCSV(["GATE3_industry_pressure_details",S.industryPressureDetails]));
+  lines.push(rowCSV(["GATE4_mgmt_precision",S.mgmtPrecision]));
+  lines.push(rowCSV(["GATE4_rp_change_magnitude",S.rpChangeMagnitude]));
+  lines.push(rowCSV(["GATE4_hcr_exists",S.hcrExists]));
+  lines.push(rowCSV(["SYNTHESIS_domain_a",S.domainASynthesis]));
+  lines.push(rowCSV(["SYNTHESIS_domain_b",S.domainBSynthesis]));
+  lines.push(rowCSV(["SYNTHESIS_ikfk",S.ikfkSynthesis]));
+  lines.push(rowCSV(["SYNTHESIS_overall",S.overallSynthesis]));
+  var csv=lines.join("\n");
+  var blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a"); a.href=url;
+  var nm=(S.stockName||"tvrp").replace(/[^a-zA-Z0-9_-]/g,"_");
+  a.download=nm+"_tvrp_"+new Date().toISOString().slice(0,10)+".csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+function triggerImport(){document.getElementById("importMsg").textContent="";document.getElementById("importFile").click();}
+
+function parseCSVText(text){
+  var rows=[]; var ls=text.split("\n");
+  for(var i=0;i<ls.length;i++){
+    if(!ls[i].trim()) continue;
+    var cols=[],cur="",inQ=false;
+    for(var j=0;j<ls[i].length;j++){
+      var ch=ls[i][j];
+      if(ch==='"'){if(inQ&&ls[i][j+1]==='"'){cur+='"';j++;}else inQ=!inQ;}
+      else if(ch===","&&!inQ){cols.push(cur);cur="";}
+      else cur+=ch;
+    }
+    cols.push(cur); rows.push(cols);
+  }
+  return rows;
+}
+
+document.addEventListener("DOMContentLoaded",function(){
+  document.getElementById("importBtn").addEventListener("click",triggerImport);
+  document.getElementById("exportBtn").addEventListener("click",exportCSV);
+  document.getElementById("importFile").addEventListener("change",function(e){
+    var file=e.target.files[0]; if(!file) return;
+    var reader=new FileReader();
+    reader.onload=function(ev){
+      try{
+        var rows=parseCSVText(ev.target.result);
+        var kv={},evRows=[],inEv=false,evHdrs=[];
+        rows.forEach(function(row){
+          if(!row[0]) return;
+          var k=row[0].trim();
+          if(k==="domain"){inEv=true;evHdrs=row.map(function(h){return h.trim();});return;}
+          if(inEv&&["A","B","IKFK"].indexOf(row[0])>=0){
+            var obj={};evHdrs.forEach(function(h,i){obj[h]=(row[i]||"").trim();});evRows.push(obj);return;
+          }
+          if(row.length>=2) kv[k]=row.slice(1).join(",").trim();
+        });
+        resetDomains();
+        evRows.forEach(function(ev){
+          var target=ev.domain==="A"?S.domainA:ev.domain==="B"?S.domainB:S.ikfk;
+          if(target[ev.id]!==undefined){
+            var st=ev.line_state||"unassessed";
+            if(ev.applicable==="TRUE"||ev.applicable==="scored") st="scored";
+            target[ev.id]={state:st,
+              score:Number(ev.score)||0,
+              quality:Number(ev.data_quality||ev.quality)||0.83,
+              agreement:Number(ev.agreement)||1.0,
+              importance:Number(ev.importance)||0.5,
+              onset_year:ev.onset_year||"",direction:ev.direction||"Decline",
+              ongoing:ev.ongoing_status||ev.ongoing||"true",
+              contradicts:ev.contradicts_scientific||"false",
+              notes:ev.notes||"",finding_text:ev.finding_text||""};
+          }
+        });
+        S.stockName=kv["PHASE0_stock_name"]||"";
+        S.generationTime=kv["PHASE0_generation_time"]||"";
+        S.assessmentType=kv["PHASE0_assessment_type"]||"survey-index";
+        S.whyConsidering=kv["PHASE0_why_considering"]?kv["PHASE0_why_considering"].split("|").filter(Boolean):[];
+        S.fishingPressureExplains=kv["PHASE0_fishing_pressure_explains"]||"uncertain";
+        S.wtA=Number(kv["DOMAIN_WEIGHT_A"])||1.0;
+        S.wtB=Number(kv["DOMAIN_WEIGHT_B"])||1.0;
+        S.wtC=Number(kv["DOMAIN_WEIGHT_C"])||1.0;
+        S.ikConsultation=kv["IKFK_ik_consultation"]||"not_sought";
+        S.fkConsultation=kv["IKFK_fk_consultation"]||"not_sought";
+        S.ikfkDisagreementNotes=kv["IKFK_disagreement_notes"]||"";
+        S.reversible=kv["GATE1_reversible"]||"uncertain";
+        S.reversibleNotes=kv["GATE1_reversible_notes"]||"";
+        S.previousCollapse=kv["GATE1_previous_collapse"]||"unknown";
+        S.lifeHistoryChanges=kv["GATE1_life_history_changes"]||"unknown";
+        S.lifeHistoryNotes=kv["GATE1_life_history_notes"]||"";
+        S.fReduced=kv["GATE2_f_reduced"]||"no";
+        S.fReductionMagnitude=kv["GATE2_f_reduction_magnitude"]||"";
+        S.fReductionDuration=kv["GATE2_f_reduction_duration"]||"";
+        S.fReductionNotes=kv["GATE2_f_reduction_notes"]||"";
+        S.primaryDriver=kv["GATE3_primary_driver"]?kv["GATE3_primary_driver"].split("|").filter(Boolean):[];
+        S.industryPressureDetails=kv["GATE3_industry_pressure_details"]||"";
+        S.mgmtPrecision=kv["GATE4_mgmt_precision"]||"";
+        S.rpChangeMagnitude=kv["GATE4_rp_change_magnitude"]||"";
+        S.hcrExists=kv["GATE4_hcr_exists"]||"no";
+        S.domainASynthesis=kv["SYNTHESIS_domain_a"]||"";
+        S.domainBSynthesis=kv["SYNTHESIS_domain_b"]||"";
+        S.ikfkSynthesis=kv["SYNTHESIS_ikfk"]||"";
+        S.overallSynthesis=kv["SYNTHESIS_overall"]||"";
+        currentTab=0; render();
+        document.getElementById("importMsg").innerHTML='<span class="import-ok">\u2713 File loaded successfully.</span>';
+      }catch(err){
+        document.getElementById("importMsg").innerHTML='<span class="import-err">\u2717 Could not parse file.</span>';
+      }
+    };
+    reader.readAsText(file); e.target.value="";
+  });
+  render();
+});
+</script>
+</body>
+</html>
